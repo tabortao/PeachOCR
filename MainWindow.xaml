@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PeachOCR"
         mc:Ignorable="d"
         Title="PeachOCR 批量识别" Height="650" Width="950" MinWidth="900" MinHeight="600"
-        Background="#18191c" Icon="pack://application:,,,/Resources/app_icon.ico" WindowStyle="None" AllowsTransparency="True">
+        Background="#242424" Icon="pack://application:,,,/Resources/app_icon.ico">
     <Window.Resources>
         <!-- 全局字体 -->
         <Style TargetType="TextBlock">
@@ -23,14 +23,14 @@
             <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei, Arial"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Foreground" Value="#fff"/>
-            <Setter Property="Background" Value="#23272e"/>
+            <Setter Property="Background" Value="#242424"/>
             <Setter Property="BorderBrush" Value="#444"/>
         </Style>
         <Style TargetType="ComboBoxItem">
             <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei, Arial"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Foreground" Value="#fff"/>
-            <Setter Property="Background" Value="#23272e"/>
+            <Setter Property="Background" Value="#242424"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
         </Style>
@@ -43,89 +43,57 @@
             <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei, Arial"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="Foreground" Value="#fff"/>
-            <Setter Property="Background" Value="#23272e"/>
+            <Setter Property="Background" Value="#242424"/>
             <Setter Property="BorderBrush" Value="#444"/>
         </Style>
         <Style TargetType="ProgressBar">
             <Setter Property="Height" Value="10"/>
-            <Setter Property="Background" Value="#23272e"/>
+            <Setter Property="Background" Value="#242424"/>
             <Setter Property="Foreground" Value="#2196f3"/>
         </Style>
     </Window.Resources>
-    <Border Background="#18191c" CornerRadius="12" Padding="0" SnapsToDevicePixels="True">
+    <Border Background="#242424" Padding="20">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="56"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <!-- 顶部自定义导航栏 -->
-            <Border Grid.Row="0" Background="#23272e" CornerRadius="12,12,0,0" Height="56" VerticalAlignment="Top">
-                <Grid>
+            <!-- 主体内容 -->
+            <StackPanel VerticalAlignment="Center">
+                <!-- 操作区 -->
+                <Grid Margin="0,0,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="48"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="96"/>
                     </Grid.ColumnDefinitions>
-                    <!-- 左侧图标 -->
-                    <Image Source="pack://application:,,,/Resources/app_icon.ico" Width="28" Height="28" Margin="10,0,0,0" VerticalAlignment="Center"/>
-                    <!-- 标题 -->
-                    <TextBlock Text="PeachOCR 批量图片文字识别" Foreground="#fff" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Column="1"/>
-                    <!-- 右侧窗口按钮 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="2" Margin="0,0,10,0">
-                        <Button Width="28" Height="28" Margin="0,0,8,0" Background="Transparent" BorderThickness="0" ToolTip="最小化" Click="OnMinimizeClick">
-                            <Path Data="M0,0 L12,0" Stroke="#fff" StrokeThickness="2" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
-                        <Button Width="28" Height="28" Background="Transparent" BorderThickness="0" ToolTip="关闭" Click="OnCloseClick">
-                            <Path Data="M2,2 L10,10 M10,2 L2,10" Stroke="#fff" StrokeThickness="2" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <!-- 文件选择区 -->
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10" HorizontalAlignment="Center">
+                        <Button x:Name="BtnSelectImages" Content="选择图片或PDF" Height="36" Width="160" Click="BtnSelectImages_Click" Background="#2196f3" Foreground="#fff" FontWeight="Bold" BorderBrush="#2196f3" Margin="0,0,16,0"/>
+                        <TextBlock x:Name="TxtFileStatus" Text="未选择文件" Foreground="#bbb" VerticalAlignment="Center" FontSize="15" Margin="0,0,16,0"/>
+                        <TextBlock Text="可直接拖入图片或PDF文件到此窗口" Foreground="#888" VerticalAlignment="Center" FontSize="15" Margin="0,0,16,0"/>
+                        <Button x:Name="BtnClear" Content="清除添加" Height="28" Width="80" Click="BtnClear_Click" Background="#444" Foreground="#fff" BorderBrush="#444"/>
                     </StackPanel>
+                    <!-- 文件列表区 -->
+                    <ListBox x:Name="ListImages" Grid.Row="1" Height="180" Margin="0,0,0,10"/>
+                    <!-- 识别结果区 -->
+                    <ListBox x:Name="ListResults" Grid.Row="2" Height="180" Margin="0,0,0,10"/>
                 </Grid>
-            </Border>
-            <!-- 主体内容卡片 -->
-            <Border Grid.Row="1" Background="#23272e" Padding="36">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.5"/>
-                </Border.Effect>
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <!-- 操作区 -->
-                    <Grid Margin="0,0,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <!-- 文件选择区 -->
-                        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10" HorizontalAlignment="Center">
-                            <Button x:Name="BtnSelectImages" Content="选择图片或PDF" Height="36" Width="160" Click="BtnSelectImages_Click" Background="#2196f3" Foreground="#fff" FontWeight="Bold" BorderBrush="#2196f3" Margin="0,0,16,0"/>
-                            <TextBlock x:Name="TxtFileStatus" Text="未选择文件" Foreground="#bbb" VerticalAlignment="Center" FontSize="15" Margin="0,0,16,0"/>
-                            <TextBlock Text="可直接拖入图片或PDF文件到此窗口" Foreground="#888" VerticalAlignment="Center" FontSize="15" Margin="0,0,16,0"/>
-                            <Button x:Name="BtnClear" Content="清除添加" Height="28" Width="80" Click="BtnClear_Click" Background="#444" Foreground="#fff" BorderBrush="#444"/>
-                        </StackPanel>
-                        <!-- 文件列表区 -->
-                        <ListBox x:Name="ListImages" Grid.Row="1" Height="120" Margin="0,0,0,10"/>
-                        <!-- 识别结果区 -->
-                        <ListBox x:Name="ListResults" Grid.Row="2" Height="120" Margin="0,0,0,10"/>
-                    </Grid>
-                    <!-- 操作按钮区 -->
-                    <Button x:Name="BtnOcr" Content="开始识别" Height="44" Width="220" Background="#2196f3" Foreground="#fff" FontWeight="Bold" FontSize="18" Click="BtnOcr_Click" Margin="0,18,0,0" BorderBrush="#2196f3" HorizontalAlignment="Center"/>
-                    <!-- 选项区 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" >
-                        <TextBlock Text="模型选择：" Foreground="#bbb" FontSize="15" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <ComboBox x:Name="ComboModel" Width="140" Height="32" SelectedIndex="0" Margin="0,0,18,0">
-                            <ComboBoxItem Content="PP-OCRv4"/>
-                            <ComboBoxItem Content="PP-OCRv5"/>
-                        </ComboBox>
-                        <CheckBox x:Name="CheckMergeTxt" Content="多文件合并为一个txt" Margin="0,0,18,0"/>
-                        <CheckBox x:Name="CheckSaveResult" Content="输出处理图片" IsChecked="True" Margin="0,0,18,0"/>
-                        <CheckBox x:Name="CheckGpu" Content="启用GPU"/>
-                    </StackPanel>
-                    <!-- 进度条 -->
-                    <ProgressBar x:Name="ProgressOcr" Margin="0,18,0,0"/>
+                <!-- 操作按钮区 -->
+                <Button x:Name="BtnOcr" Content="开始识别" Height="44" Width="220" Background="#2196f3" Foreground="#fff" FontWeight="Bold" FontSize="18" Click="BtnOcr_Click" Margin="0,18,0,0" BorderBrush="#2196f3" HorizontalAlignment="Center"/>
+                <!-- 选项区 -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0" >
+                    <TextBlock Text="模型选择：" Foreground="#bbb" FontSize="15" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox x:Name="ComboModel" Width="140" Height="32" SelectedIndex="0" Margin="0,0,18,0">
+                        <ComboBoxItem Content="PP-OCRv4"/>
+                        <ComboBoxItem Content="PP-OCRv5"/>
+                    </ComboBox>
+                    <CheckBox x:Name="CheckMergeTxt" Content="多文件合并为一个txt" Margin="0,0,18,0"/>
+                    <CheckBox x:Name="CheckSaveResult" Content="输出处理图片" IsChecked="True" Margin="0,0,18,0"/>
+                    <CheckBox x:Name="CheckGpu" Content="启用GPU"/>
                 </StackPanel>
-            </Border>
+                <!-- 进度条 -->
+                <ProgressBar x:Name="ProgressOcr" Margin="0,18,0,0"/>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>
