@@ -7,6 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <NoWarn>$(NoWarn) ;NU1701</NoWarn>
+    <ApplicationIcon>Resources\app_icon.ico</ApplicationIcon>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +16,7 @@
     <PackageReference Include="OpenVINO.CSharp.API.Extensions.PaddleOCR" Version="1.0.3" />
     <PackageReference Include="OpenVINO.runtime.win" Version="2025.0.0.1" />
     <Resource Include="Resources\\app_icon.ico" />
+    <Resource Include="Resources\\icon.png" />
     <None Include="models\\**\\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

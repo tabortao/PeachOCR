@@ -15,5 +15,4 @@ Remove-Item -Recurse -Force .\bin, .\obj
 dotnet build
 # 启动项目
 dotnet run --no-build
-dotnet run --no-build --project PeachOCR.csproj
 ```
