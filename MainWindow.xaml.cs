@@ -23,6 +23,8 @@ namespace PeachOCR
     public partial class MainWindow : Window
     {
         private List<string> selectedImages = new();
+        // 存储每个文件的识别结果
+        private Dictionary<string, List<string>> fileResultMap = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -42,6 +44,7 @@ namespace PeachOCR
             CheckMergeTxt.IsChecked = false;
             TxtFileStatus.Text = "未选择文件";
             this.MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) this.DragMove(); };
+            ListImages.SelectionChanged += ListImages_SelectionChanged;
         }
 
         private void OnMinimizeClick(object sender, RoutedEventArgs e)
@@ -64,6 +67,8 @@ namespace PeachOCR
                 selectedImages = dlg.FileNames.ToList();
                 ListImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
                 TxtFileStatus.Text = selectedImages.Count > 0 ? $"已选择 {selectedImages.Count} 个文件" : "未选择文件";
+                fileResultMap.Clear();
+                ListResults.ItemsSource = null;
             }
         }
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -72,6 +77,7 @@ namespace PeachOCR
             ListImages.ItemsSource = null;
             TxtFileStatus.Text = "未选择文件";
             ListResults.ItemsSource = null;
+            fileResultMap.Clear();
         }
         private async void BtnOcr_Click(object sender, RoutedEventArgs e)
         {
@@ -83,6 +89,7 @@ namespace PeachOCR
             BtnOcr.IsEnabled = false;
             ProgressOcr.Value = 0;
             ListResults.ItemsSource = null;
+            fileResultMap.Clear();
             var processor = new OCR.OcrBatchProcessor();
             processor.SetModel(ComboModel.SelectedIndex == 0 ? OCR.OcrBatchProcessor.ModelType.PP_OCRv4 : OCR.OcrBatchProcessor.ModelType.PP_OCRv5);
             processor.SetUseGpu(CheckGpu.IsChecked == true, CheckGpu.IsChecked == true);
@@ -90,26 +97,41 @@ namespace PeachOCR
             processor.AddImages(selectedImages);
             int total = selectedImages.Count;
             int finished = 0;
-            var resultList = new List<string>();
             var task = Task.Run(async () =>
             {
                 var (details, totalMs) = await processor.RunBatchOcrAsync(2);
                 return (details, totalMs);
             });
             var result = await task;
+            // 记录每个文件的识别结果
             foreach (var detail in result.details)
             {
-                string txt = $"[{System.IO.Path.GetFileName(detail.ImgPath)}] ";
+                string fileName = System.IO.Path.GetFileName(detail.ImgPath);
+                List<string> lines = new();
                 if (detail.Result == null)
-                    txt += "识别失败";
+                {
+                    lines.Add("识别失败");
+                }
                 else
-                    txt += string.Join(" ", detail.Result.Select(r => r.text));
-                resultList.Add(txt);
+                {
+                    foreach (var r in detail.Result)
+                    {
+                        lines.Add(r.text);
+                    }
+                }
+                fileResultMap[fileName] = lines;
                 finished++;
                 ProgressOcr.Value = finished * 100.0 / total;
             }
             ProgressOcr.Value = 100;
-            ListResults.ItemsSource = resultList;
+            // 默认选中第一个文件并显示其结果
+            if (selectedImages.Count > 0)
+            {
+                ListImages.SelectedIndex = 0;
+                var firstFile = System.IO.Path.GetFileName(selectedImages[0]);
+                if (fileResultMap.ContainsKey(firstFile))
+                    ListResults.ItemsSource = fileResultMap[firstFile];
+            }
             BtnOcr.IsEnabled = true;
             // 合并txt功能
             if (CheckMergeTxt.IsChecked == true && result.details.Count > 0)
@@ -132,6 +154,27 @@ namespace PeachOCR
                 }
             }
             MessageBox.Show($"识别完成！共耗时 {result.totalMs} ms", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        // 文件列表选中项变化时，显示对应识别结果
+        private void ListImages_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListImages.SelectedItem is string fileName)
+            {
+                // fileName 可能只是文件名
+                if (fileResultMap.TryGetValue(fileName, out var lines))
+                {
+                    ListResults.ItemsSource = lines;
+                }
+                else
+                {
+                    ListResults.ItemsSource = null;
+                }
+            }
+            else
+            {
+                ListResults.ItemsSource = null;
+            }
         }
     }
 }
