@@ -146,7 +146,7 @@ namespace OCR
         /// 总耗时不受图片窗口阻塞影响。
         /// </summary>
         /// <param name="maxDegreeOfParallelism">最大并发数，建议2~4，过大易崩溃</param>
-        public async Task<(List<OcrResultDetail> details, long totalMs)> RunBatchOcrAsync(int maxDegreeOfParallelism = 2)
+        public async Task<(List<OcrResultDetail> details, long totalMs)> RunBatchOcrAsync(int maxDegreeOfParallelism = 2, Action<int, int>? onProgress = null)
         {
             // InitOcr 只用于获取配置参数，不再全局 new OCRPredictor
             InitOcr();
@@ -155,6 +155,8 @@ namespace OCR
             var lockObj = new object();
             Stopwatch swAll = new Stopwatch();
             swAll.Start();
+            int finished = 0;
+            int total = imagePaths.Count;
             using (var semaphore = new System.Threading.SemaphoreSlim(maxDegreeOfParallelism))
             {
                 var tasks = imagePaths.Select(async imgPath =>
@@ -166,7 +168,11 @@ namespace OCR
                         if (img.Empty())
                         {
                             lock (lockObj)
+                            {
                                 details.Add(new OcrResultDetail { ImgPath = imgPath, Result = null, ResultImgPath = null, OcrMs = 0 });
+                                finished++;
+                                onProgress?.Invoke(finished, total);
+                            }
                             return;
                         }
                         // 每个任务独立 new OcrConfig 和 OCRPredictor，保证线程安全
@@ -228,6 +234,8 @@ namespace OCR
                                 ResultImgPath = resultImgPath,
                                 OcrMs = sw.ElapsedMilliseconds
                             });
+                            finished++;
+                            onProgress?.Invoke(finished, total);
                         }
                     }
                     finally

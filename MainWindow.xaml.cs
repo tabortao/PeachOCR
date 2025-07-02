@@ -101,10 +101,17 @@ namespace PeachOCR
             processor.SetSaveResultImage(CheckSaveResult.IsChecked == true);
             processor.AddImages(selectedImages);
             int total = selectedImages.Count;
-            int finished = 0;
+            // int finished = 0; // 已废弃，进度由回调控制
             var task = Task.Run(async () =>
             {
-                var (details, totalMs) = await processor.RunBatchOcrAsync(2);
+                var (details, totalMs) = await processor.RunBatchOcrAsync(2, (done, all) =>
+                {
+                    // 进度回调，需在UI线程更新
+                    Dispatcher.Invoke(() =>
+                    {
+                        ProgressOcr.Value = all > 0 ? done * 100.0 / all : 0;
+                    });
+                });
                 return (details, totalMs);
             });
             var result = await task;
@@ -125,8 +132,6 @@ namespace PeachOCR
                     }
                 }
                 fileResultMap[fileName] = lines;
-                finished++;
-                ProgressOcr.Value = finished * 100.0 / total;
             }
             ProgressOcr.Value = 100;
             // 默认选中第一个文件并显示其结果
@@ -138,7 +143,7 @@ namespace PeachOCR
                     ListResults.ItemsSource = fileResultMap[firstFile];
             }
             BtnOcr.IsEnabled = true;
-            // 合并txt功能
+            // 合并txt功能（自动保存到结果文件夹，无需弹窗）
             if (CheckMergeTxt.IsChecked == true && result.details.Count > 0)
             {
                 var sb = new StringBuilder();
@@ -147,15 +152,20 @@ namespace PeachOCR
                     if (detail.Result != null)
                         sb.AppendLine(string.Join(" ", detail.Result.Select(r => r.text)));
                 }
-                var saveDlg = new Microsoft.Win32.SaveFileDialog
+                string mergedDir = "";
+                if (selectedImages.Count > 0)
                 {
-                    Filter = "文本文件|*.txt",
-                    FileName = "OCR_Result_Merged.txt"
-                };
-                if (saveDlg.ShowDialog() == true)
-                {
-                    System.IO.File.WriteAllText(saveDlg.FileName, sb.ToString());
-                    lastMergedTxtPath = saveDlg.FileName;
+                    string firstImg = selectedImages[0];
+                    string? parentDir = System.IO.Path.GetDirectoryName(firstImg);
+                    if (!string.IsNullOrEmpty(parentDir))
+                    {
+                        mergedDir = System.IO.Path.Combine(parentDir, "OCR_Result");
+                        if (!System.IO.Directory.Exists(mergedDir))
+                            System.IO.Directory.CreateDirectory(mergedDir);
+                        string savePath = System.IO.Path.Combine(mergedDir, "OCR_Result_Merged.txt");
+                        System.IO.File.WriteAllText(savePath, sb.ToString());
+                        lastMergedTxtPath = savePath;
+                    }
                 }
             }
             // 状态栏提示（耗时用秒，显示存储文件夹路径，自动推断）
