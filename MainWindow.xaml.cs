@@ -25,29 +25,26 @@ namespace PeachOCR
         private List<string> selectedImages = new();
         // 存储每个文件的识别结果
         private Dictionary<string, List<string>> fileResultMap = new();
-        // private TextBlock ListImagesEmptyHint; // 注：自动生成，无需手动声明
+        // 注意：不要声明任何和XAML控件同名的字段，否则会导致自动生成失效
         public MainWindow()
         {
             InitializeComponent();
-            // 绑定所有控件字段，防止XAML自动生成失效
-            BtnSelectImages = (Button)FindName("BtnSelectImages");
-            BtnClear = (Button)FindName("BtnClear");
-            BtnOcr = (Button)FindName("BtnOcr");
-            ListImages = (ListBox)FindName("ListImages");
-            ListResults = (ListBox)FindName("ListResults");
-            ComboModel = (ComboBox)FindName("ComboModel");
-            CheckGpu = (CheckBox)FindName("CheckGpu");
-            CheckSaveResult = (CheckBox)FindName("CheckSaveResult");
-            CheckMergeTxt = (CheckBox)FindName("CheckMergeTxt");
-            ProgressOcr = (ProgressBar)FindName("ProgressOcr");
-            TxtFileStatus = (TextBlock)FindName("TxtFileStatus");
-            // ListImagesEmptyHint = (TextBlock)FindName("ListImagesEmptyHint"); // 注：自动生成，无需手动查找
-            CheckSaveResult.IsChecked = true;
-            CheckMergeTxt.IsChecked = false;
-            TxtFileStatus.Text = "未选择文件";
+            // 所有控件均由XAML自动生成partial字段，无需手动FindName
+            // 初始化控件状态
+            if (CheckSaveResult != null) CheckSaveResult.IsChecked = true;
+            if (CheckMergeTxt != null) CheckMergeTxt.IsChecked = false;
+            if (TxtFileStatus != null) TxtFileStatus.Text = "未选择文件";
             this.MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) this.DragMove(); };
-            ListImages.SelectionChanged += ListImages_SelectionChanged;
+            if (ListImages != null) ListImages.SelectionChanged += ListImages_SelectionChanged;
             UpdateListImagesHint();
+
+            // 动态设置窗口标题，显示程序集版本
+            try
+            {
+                var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                this.Title = $"PeachOCR 批量识别 v{ver?.ToString(3) ?? "?"}";
+            }
+            catch { /* ignore */ }
         }
 
         private void OnMinimizeClick(object sender, RoutedEventArgs e)

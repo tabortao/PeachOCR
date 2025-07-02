@@ -15,4 +15,8 @@ Remove-Item -Recurse -Force .\bin, .\obj
 dotnet build
 # 启动项目
 dotnet run --no-build
+# AOT编译
+dotnet publish -c Release -r win-x64 --self-contained true
+# 不包含.net运行时
+dotnet publish -c Release -r win-x64 --self-contained false
 ```
