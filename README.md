@@ -1,8 +1,8 @@
 # PeachOCR
 
-PeachOCR 是一个基于 .NET 8 WPF 框架开发的本地批量图片/PDF文字识别工具，集成了 PaddleOCR、OpenVINO、OpenCV 等高性能推理与图像处理库，支持中文、英文等多语言文本识别。
+PeachOCR 是一个基于 .NET 8 WPF 框架开发的本地批量图片/PDF文字识别工具，集成了 PaddleOCR、OpenVINO、OpenCV等高性能推理与图像处理库，支持中文、英文等多语言文本识别。
 
-[PeachOCR-UI](docs\images\PeachOCR-UI.jpg)
+![PeachOCR-UI](docs\images\PeachOCR-UI.jpg)
 
 ## 主要特性
 
@@ -55,9 +55,5 @@ dotnet run --no-build
 ## 依赖模型
 - `models/ch_PP-OCRv4/` 及 `models/ch_PP-OCRv5/` 下需放置对应 onnx 模型和字典文件
 
-## 许可证
-MIT
-
----
-
-如有问题或建议欢迎 Issue/PR。
+## 🙏感谢
+- [PaddleOCR-OpenVINO-CSharp](https://github.com/guojin-yan/PaddleOCR-OpenVINO-CSharp)
