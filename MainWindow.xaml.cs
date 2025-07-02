@@ -79,7 +79,9 @@ namespace PeachOCR
             ListResults.ItemsSource = null;
             fileResultMap.Clear();
             ProgressOcr.Value = 0;
+            StatusBarText.Text = string.Empty;
         }
+        private string? lastMergedTxtPath = null;
         private async void BtnOcr_Click(object sender, RoutedEventArgs e)
         {
             if (selectedImages.Count == 0)
@@ -91,6 +93,8 @@ namespace PeachOCR
             ProgressOcr.Value = 0;
             ListResults.ItemsSource = null;
             fileResultMap.Clear();
+            lastMergedTxtPath = null;
+            StatusBarText.Text = "正在识别...";
             var processor = new OCR.OcrBatchProcessor();
             processor.SetModel(ComboModel.SelectedIndex == 0 ? OCR.OcrBatchProcessor.ModelType.PP_OCRv4 : OCR.OcrBatchProcessor.ModelType.PP_OCRv5);
             processor.SetUseGpu(CheckGpu.IsChecked == true, CheckGpu.IsChecked == true);
@@ -151,10 +155,31 @@ namespace PeachOCR
                 if (saveDlg.ShowDialog() == true)
                 {
                     System.IO.File.WriteAllText(saveDlg.FileName, sb.ToString());
-                    MessageBox.Show($"已保存合并txt：{saveDlg.FileName}", "保存成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                    lastMergedTxtPath = saveDlg.FileName;
                 }
             }
-            MessageBox.Show($"识别完成！共耗时 {result.totalMs} ms", "完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            // 状态栏提示（耗时用秒，显示存储文件夹路径，自动推断）
+            double seconds = result.totalMs / 1000.0;
+            string resultDir = "(未合并txt)";
+            if (lastMergedTxtPath != null)
+            {
+                try
+                {
+                    resultDir = System.IO.Path.GetDirectoryName(lastMergedTxtPath) ?? lastMergedTxtPath;
+                }
+                catch { resultDir = lastMergedTxtPath; }
+            }
+            else if (selectedImages.Count > 0)
+            {
+                // 推断结果文件夹为用户输入图片的同级目录下的OCR_Result
+                string firstImg = selectedImages[0];
+                string? parentDir = System.IO.Path.GetDirectoryName(firstImg);
+                if (!string.IsNullOrEmpty(parentDir))
+                {
+                    resultDir = System.IO.Path.Combine(parentDir, "OCR_Result");
+                }
+            }
+            StatusBarText.Text = $"识别完成，耗时 {seconds:F2} 秒，识别结果存储于 {resultDir}";
         }
 
         // 文件列表选中项变化时，显示对应识别结果
@@ -169,12 +194,12 @@ namespace PeachOCR
                 }
                 else
                 {
-                    ListResults.ItemsSource = null;
+                    ListResults.ItemsSource = Array.Empty<string>();
                 }
             }
             else
             {
-                ListResults.ItemsSource = null;
+                ListResults.ItemsSource = Array.Empty<string>();
             }
         }
     }

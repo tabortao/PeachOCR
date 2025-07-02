@@ -255,6 +255,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
         <!-- 标题区域（居中无图标） -->
@@ -338,5 +339,10 @@
             <TextBlock Text="处理进度" Style="{StaticResource SectionTitle}"/>
             <ProgressBar x:Name="ProgressOcr"/>
         </StackPanel>
+
+        <!-- 状态栏区域 -->
+        <Border Grid.Row="4" Background="#232323" Height="32" VerticalAlignment="Bottom" CornerRadius="4" Margin="0,10,0,0">
+            <TextBlock x:Name="StatusBarText" VerticalAlignment="Center" Margin="12,0,0,0" Foreground="#90caf9" FontSize="14"/>
+        </Border>
     </Grid>
 </Window>
