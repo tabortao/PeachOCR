@@ -303,8 +303,9 @@
                                        Foreground="#888"
                                        FontStyle="Italic"
                                        FontSize="15"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Margin="12,8,0,0"
                                        IsHitTestVisible="False"
                                        Visibility="Collapsed"
                                        />
