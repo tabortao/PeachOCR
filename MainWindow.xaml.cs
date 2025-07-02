@@ -78,6 +78,7 @@ namespace PeachOCR
             TxtFileStatus.Text = "未选择文件";
             ListResults.ItemsSource = null;
             fileResultMap.Clear();
+            ProgressOcr.Value = 0;
         }
         private async void BtnOcr_Click(object sender, RoutedEventArgs e)
         {
