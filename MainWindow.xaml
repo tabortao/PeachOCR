@@ -295,7 +295,20 @@
                     <!-- 文件列表 -->
                     <StackPanel Grid.Column="0" Margin="0,0,10,0">
                         <TextBlock Text="待处理文件列表" Style="{StaticResource SectionTitle}"/>
-                        <ListBox x:Name="ListImages" Height="320" SelectionChanged="ListImages_SelectionChanged"/>
+                        <Grid>
+                            <ListBox x:Name="ListImages" Height="320" SelectionChanged="ListImages_SelectionChanged"
+                                     AllowDrop="True" PreviewDragOver="ListImages_PreviewDragOver" Drop="ListImages_Drop"/>
+                            <TextBlock x:Name="ListImagesEmptyHint"
+                                       Text="可直接拖入要识别的图片或PDF"
+                                       Foreground="#888"
+                                       FontStyle="Italic"
+                                       FontSize="15"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       IsHitTestVisible="False"
+                                       Visibility="Collapsed"
+                                       />
+                        </Grid>
                     </StackPanel>
                     <!-- 结果列表 -->
                     <StackPanel Grid.Column="1">

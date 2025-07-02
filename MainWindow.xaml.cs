@@ -25,6 +25,7 @@ namespace PeachOCR
         private List<string> selectedImages = new();
         // 存储每个文件的识别结果
         private Dictionary<string, List<string>> fileResultMap = new();
+        // private TextBlock ListImagesEmptyHint; // 注：自动生成，无需手动声明
         public MainWindow()
         {
             InitializeComponent();
@@ -40,11 +41,13 @@ namespace PeachOCR
             CheckMergeTxt = (CheckBox)FindName("CheckMergeTxt");
             ProgressOcr = (ProgressBar)FindName("ProgressOcr");
             TxtFileStatus = (TextBlock)FindName("TxtFileStatus");
+            // ListImagesEmptyHint = (TextBlock)FindName("ListImagesEmptyHint"); // 注：自动生成，无需手动查找
             CheckSaveResult.IsChecked = true;
             CheckMergeTxt.IsChecked = false;
             TxtFileStatus.Text = "未选择文件";
             this.MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) this.DragMove(); };
             ListImages.SelectionChanged += ListImages_SelectionChanged;
+            UpdateListImagesHint();
         }
 
         private void OnMinimizeClick(object sender, RoutedEventArgs e)
@@ -69,6 +72,7 @@ namespace PeachOCR
                 TxtFileStatus.Text = selectedImages.Count > 0 ? $"已选择 {selectedImages.Count} 个文件" : "未选择文件";
                 fileResultMap.Clear();
                 ListResults.ItemsSource = null;
+                UpdateListImagesHint();
             }
         }
         private void BtnClear_Click(object sender, RoutedEventArgs e)
@@ -80,6 +84,45 @@ namespace PeachOCR
             fileResultMap.Clear();
             ProgressOcr.Value = 0;
             StatusBarText.Text = string.Empty;
+            UpdateListImagesHint();
+        }
+             // 支持拖拽文件到文件列表
+        private void ListImages_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            e.Handled = true;
+        }
+
+        private void ListImages_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                var supported = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".pdf" };
+                var addFiles = files.Where(f => supported.Contains(System.IO.Path.GetExtension(f).ToLower())).ToList();
+                if (addFiles.Count > 0)
+                {
+                    selectedImages.AddRange(addFiles);
+                    ListImages.ItemsSource = null;
+                    ListImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
+                    TxtFileStatus.Text = $"已选择 {selectedImages.Count} 个文件";
+                    UpdateListImagesHint();
+                }
+            }
+        }
+
+        // 文件列表为空时显示提示
+        private void UpdateListImagesHint()
+        {
+            if (ListImagesEmptyHint != null)
+                ListImagesEmptyHint.Visibility = (selectedImages.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
         }
         private string? lastMergedTxtPath = null;
         private async void BtnOcr_Click(object sender, RoutedEventArgs e)
