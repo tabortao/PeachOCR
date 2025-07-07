@@ -230,8 +230,10 @@ namespace PeachOCR
                 }
                 imgToText[detail.ImgPath] = lines;
             }
-            // PDF合并txt输出
+            // 统一将所有txt输出到源文件同级的OCR_Result文件夹，避免重复
             var txtPaths = new List<string>();
+            var createdResultDirs = new HashSet<string>();
+            // PDF合并txt输出
             foreach (var kv in pdfToTxtMap)
             {
                 string pdfPath = kv.Key;
@@ -242,8 +244,14 @@ namespace PeachOCR
                     if (imgToText.TryGetValue(img, out var lines))
                         allLines.AddRange(lines);
                 }
-                // 输出txt到PDF同级同名.txt
-                string txtPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(pdfPath) ?? "", System.IO.Path.GetFileNameWithoutExtension(pdfPath) + ".txt");
+                string srcDir = System.IO.Path.GetDirectoryName(pdfPath) ?? "";
+                string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                if (!createdResultDirs.Contains(resultDir))
+                {
+                    System.IO.Directory.CreateDirectory(resultDir);
+                    createdResultDirs.Add(resultDir);
+                }
+                string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(pdfPath) + ".txt");
                 System.IO.File.WriteAllLines(txtPath, allLines);
                 fileResultMap[System.IO.Path.GetFileName(pdfPath)] = allLines;
                 txtPaths.Add(txtPath);
@@ -253,7 +261,14 @@ namespace PeachOCR
             {
                 if (imgToText.TryGetValue(img, out var lines))
                 {
-                    string txtPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(img) ?? "", System.IO.Path.GetFileNameWithoutExtension(img) + ".txt");
+                    string srcDir = System.IO.Path.GetDirectoryName(img) ?? "";
+                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                    if (!createdResultDirs.Contains(resultDir))
+                    {
+                        System.IO.Directory.CreateDirectory(resultDir);
+                        createdResultDirs.Add(resultDir);
+                    }
+                    string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(img) + ".txt");
                     System.IO.File.WriteAllLines(txtPath, lines);
                     fileResultMap[System.IO.Path.GetFileName(img)] = lines;
                     txtPaths.Add(txtPath);

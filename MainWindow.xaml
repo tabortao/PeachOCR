@@ -293,10 +293,17 @@
                         <ColumnDefinition Width="3*"/>
                     </Grid.ColumnDefinitions>
                     <!-- 文件列表 -->
-                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <Grid Grid.Column="0" Margin="0,0,10,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
                         <TextBlock Text="待处理文件列表" Style="{StaticResource SectionTitle}"/>
-                        <Grid>
-                            <ListBox x:Name="ListImages" Height="320" SelectionChanged="ListImages_SelectionChanged"
+                        <Grid Grid.Row="1">
+                            <ListBox x:Name="ListImages"
+                                     VerticalAlignment="Stretch"
+                                     BorderThickness="1" BorderBrush="#666" Margin="0,0,0,0"
+                                     SelectionChanged="ListImages_SelectionChanged"
                                      AllowDrop="True" PreviewDragOver="ListImages_PreviewDragOver" Drop="ListImages_Drop"/>
                             <TextBlock x:Name="ListImagesEmptyHint"
                                        Text="可直接拖入要识别的图片或PDF"
@@ -310,12 +317,17 @@
                                        Visibility="Collapsed"
                                        />
                         </Grid>
-                    </StackPanel>
+                    </Grid>
                     <!-- 结果列表 -->
-                    <StackPanel Grid.Column="1">
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
                         <TextBlock Text="识别结果" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
                         <TextBox x:Name="ListResultsTextBox"
-                                 Height="320"
+                                 Grid.Row="1"
+                                 VerticalAlignment="Stretch"
                                  VerticalScrollBarVisibility="Auto"
                                  HorizontalScrollBarVisibility="Auto"
                                  TextWrapping="Wrap"
@@ -323,13 +335,14 @@
                                  IsReadOnly="True"
                                  Background="#252525"
                                  Foreground="#E0E0E0"
-                                 BorderBrush="#444"
+                                 BorderBrush="#666"
                                  BorderThickness="1"
                                  FontSize="14"
                                  FontFamily="Segoe UI, Microsoft YaHei, Arial"
-                                 Margin="0,5,0,0"
+                                 Margin="0,0,0,0"
+                                 Padding="4,2,4,2"
                                  />
-                    </StackPanel>
+                    </Grid>
                 </Grid>
             </Grid>
         </Border>
