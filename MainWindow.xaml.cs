@@ -26,16 +26,56 @@ namespace PeachOCR
         // 存储每个文件的识别结果
         private Dictionary<string, List<string>> fileResultMap = new();
         // 注意：不要声明任何和XAML控件同名的字段，否则会导致自动生成失效
+
+        // 双击识别结果区域，打开对应的txt文件
+        private void ListResultsTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var listImages = this.FindName("ListImages") as ListBox;
+            if (listImages?.SelectedIndex is int idx && idx >= 0 && idx < selectedImages.Count)
+            {
+                string filePath = selectedImages[idx];
+                string txtPath = string.Empty;
+                if (System.IO.File.Exists(filePath))
+                {
+                    string srcDir = System.IO.Path.GetDirectoryName(filePath) ?? string.Empty;
+                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                    string name = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                    txtPath = System.IO.Path.Combine(resultDir, name + ".txt");
+                    if (System.IO.File.Exists(txtPath))
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                            {
+                                FileName = txtPath,
+                                UseShellExecute = true
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"无法打开文件：{txtPath}\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show($"未找到对应的txt文件：{txtPath}", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+        }
         public MainWindow()
         {
             InitializeComponent();
-            // 所有控件均由XAML自动生成partial字段，无需手动FindName
-            // 初始化控件状态
-            if (CheckSaveResult != null) CheckSaveResult.IsChecked = true;
-            if (CheckMergeTxt != null) CheckMergeTxt.IsChecked = false;
-            if (TxtFileStatus != null) TxtFileStatus.Text = "未选择文件";
+            // 初始化控件状态（全部用FindName方式访问，避免partial字段丢失问题）
+            var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
+            if (checkSaveResult != null) checkSaveResult.IsChecked = true;
+            var checkMergeTxt = this.FindName("CheckMergeTxt") as CheckBox;
+            if (checkMergeTxt != null) checkMergeTxt.IsChecked = false;
+            var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
+            if (txtFileStatus != null) txtFileStatus.Text = "未选择文件";
             this.MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) this.DragMove(); };
-            if (ListImages != null) ListImages.SelectionChanged += ListImages_SelectionChanged;
+            var listImages = this.FindName("ListImages") as ListBox;
+            if (listImages != null) listImages.SelectionChanged += ListImages_SelectionChanged;
             UpdateListImagesHint();
 
             // 动态设置窗口标题，显示程序集版本
