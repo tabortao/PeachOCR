@@ -8,6 +8,9 @@ cd PeachOCR
 dotnet add package OpenVINO.CSharp.API.Extensions.PaddleOCR
 dotnet add package OpenVINO.runtime.win
 dotnet add package OpenCvSharp4.runtime.win
+dotnet add package Docnet.Core #用于PDF转图片
+dotnet add package SixLabors.ImageSharp #用于PDF转图片
+
 
 # 清理项目
 Remove-Item -Recurse -Force .\bin, .\obj

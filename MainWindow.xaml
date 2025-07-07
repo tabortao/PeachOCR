@@ -313,8 +313,22 @@
                     </StackPanel>
                     <!-- 结果列表 -->
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="识别结果" Style="{StaticResource SectionTitle}"/>
-                        <ListBox x:Name="ListResults" Height="320"/>
+                        <TextBlock Text="识别结果" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                        <TextBox x:Name="ListResultsTextBox"
+                                 Height="320"
+                                 VerticalScrollBarVisibility="Auto"
+                                 HorizontalScrollBarVisibility="Auto"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="True"
+                                 IsReadOnly="True"
+                                 Background="#252525"
+                                 Foreground="#E0E0E0"
+                                 BorderBrush="#444"
+                                 BorderThickness="1"
+                                 FontSize="14"
+                                 FontFamily="Segoe UI, Microsoft YaHei, Arial"
+                                 Margin="0,5,0,0"
+                                 />
                     </StackPanel>
                 </Grid>
             </Grid>

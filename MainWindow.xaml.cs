@@ -65,22 +65,30 @@ namespace PeachOCR
             if (dlg.ShowDialog() == true)
             {
                 selectedImages = dlg.FileNames.ToList();
-                ListImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
-                TxtFileStatus.Text = selectedImages.Count > 0 ? $"已选择 {selectedImages.Count} 个文件" : "未选择文件";
+                var listImages = this.FindName("ListImages") as ListBox;
+                if (listImages != null) listImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
+                var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
+                if (txtFileStatus != null) txtFileStatus.Text = selectedImages.Count > 0 ? $"已选择 {selectedImages.Count} 个文件" : "未选择文件";
                 fileResultMap.Clear();
-                ListResults.ItemsSource = null;
+                var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+                if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
                 UpdateListImagesHint();
             }
         }
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             selectedImages.Clear();
-            ListImages.ItemsSource = null;
-            TxtFileStatus.Text = "未选择文件";
-            ListResults.ItemsSource = null;
+            var listImages = this.FindName("ListImages") as ListBox;
+            if (listImages != null) listImages.ItemsSource = null;
+            var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
+            if (txtFileStatus != null) txtFileStatus.Text = "未选择文件";
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
             fileResultMap.Clear();
-            ProgressOcr.Value = 0;
-            StatusBarText.Text = string.Empty;
+            var progressOcr = this.FindName("ProgressOcr") as ProgressBar;
+            if (progressOcr != null) progressOcr.Value = 0;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+            if (statusBarText != null) statusBarText.Text = string.Empty;
             UpdateListImagesHint();
         }
              // 支持拖拽文件到文件列表
@@ -107,9 +115,14 @@ namespace PeachOCR
                 if (addFiles.Count > 0)
                 {
                     selectedImages.AddRange(addFiles);
-                    ListImages.ItemsSource = null;
-                    ListImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
-                    TxtFileStatus.Text = $"已选择 {selectedImages.Count} 个文件";
+                    var listImages = this.FindName("ListImages") as ListBox;
+                    if (listImages != null)
+                    {
+                        listImages.ItemsSource = null;
+                        listImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
+                    }
+                    var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
+                    if (txtFileStatus != null) txtFileStatus.Text = $"已选择 {selectedImages.Count} 个文件";
                     UpdateListImagesHint();
                 }
             }
@@ -118,44 +131,88 @@ namespace PeachOCR
         // 文件列表为空时显示提示
         private void UpdateListImagesHint()
         {
-            if (ListImagesEmptyHint != null)
-                ListImagesEmptyHint.Visibility = (selectedImages.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
+            var listImagesEmptyHint = this.FindName("ListImagesEmptyHint") as TextBlock;
+            if (listImagesEmptyHint != null)
+                listImagesEmptyHint.Visibility = (selectedImages.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
         }
-        private string? lastMergedTxtPath = null;
+        // 已废弃字段：lastMergedTxtPath
         private async void BtnOcr_Click(object sender, RoutedEventArgs e)
         {
+            // 通过FindName获取所有控件，兼容partial字段丢失的情况
+            var comboModel = this.FindName("ComboModel") as ComboBox;
+            var checkGpu = this.FindName("CheckGpu") as CheckBox;
+            var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
+            var progressOcr = this.FindName("ProgressOcr") as ProgressBar;
+            var listImages = this.FindName("ListImages") as ListBox;
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var btnOcr = this.FindName("BtnOcr") as Button;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+
             if (selectedImages.Count == 0)
             {
                 MessageBox.Show("请先选择图片或PDF文件！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            BtnOcr.IsEnabled = false;
-            ProgressOcr.Value = 0;
-            ListResults.ItemsSource = null;
+            if (btnOcr != null) btnOcr.IsEnabled = false;
+            if (progressOcr != null) progressOcr.Value = 0;
+            if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
             fileResultMap.Clear();
-            lastMergedTxtPath = null;
-            StatusBarText.Text = "正在识别...";
+            // lastMergedTxtPath = null; // 已废弃，无需赋值
+            if (statusBarText != null) statusBarText.Text = "正在识别...";
+
+            // 计时开始
+            var ocrWatch = System.Diagnostics.Stopwatch.StartNew();
+            // 1. 处理PDF文件，先转图片
+            var pdfExts = new[] { ".pdf" };
+            var pdfFiles = selectedImages.Where(f => pdfExts.Contains(System.IO.Path.GetExtension(f).ToLower())).ToList();
+            var imageFiles = selectedImages.Where(f => !pdfExts.Contains(System.IO.Path.GetExtension(f).ToLower())).ToList();
+            var allOcrImages = new List<string>();
+            var pdfToTxtMap = new Dictionary<string, List<string>>(); // pdf文件名->所有识别文本
+            if (pdfFiles.Count > 0)
+            {
+                foreach (var pdf in pdfFiles)
+                {
+                    // 输出目录与PDF同级，文件夹名同PDF名
+                    string pdfDir = System.IO.Path.GetDirectoryName(pdf) ?? "";
+                    string pdfName = System.IO.Path.GetFileNameWithoutExtension(pdf);
+                    string outDir = System.IO.Path.Combine(pdfDir, pdfName);
+                    var options = new PDFToImage.ConvertOptions
+                    {
+                        OutputDir = pdfDir,
+                        ImageFormat = "png",
+                        Dpi = 2000 // 设置高分辨率，2000 DPI
+                    };
+                    PDFToImage.Convert(pdf, options);
+                    // 收集该PDF转出的所有图片
+                    var imgs = System.IO.Directory.GetFiles(outDir, "page_*.png").OrderBy(f => f).ToList();
+                    allOcrImages.AddRange(imgs);
+                    pdfToTxtMap[pdf] = imgs;
+                }
+            }
+            allOcrImages.AddRange(imageFiles);
+
             var processor = new OCR.OcrBatchProcessor();
-            processor.SetModel(ComboModel.SelectedIndex == 0 ? OCR.OcrBatchProcessor.ModelType.PP_OCRv4 : OCR.OcrBatchProcessor.ModelType.PP_OCRv5);
-            processor.SetUseGpu(CheckGpu.IsChecked == true, CheckGpu.IsChecked == true);
-            processor.SetSaveResultImage(CheckSaveResult.IsChecked == true);
-            processor.AddImages(selectedImages);
-            int total = selectedImages.Count;
-            // int finished = 0; // 已废弃，进度由回调控制
+            processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OCR.OcrBatchProcessor.ModelType.PP_OCRv4 : OCR.OcrBatchProcessor.ModelType.PP_OCRv5);
+            processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
+            processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
+            processor.AddImages(allOcrImages);
+            int total = allOcrImages.Count;
             var task = Task.Run(async () =>
             {
-                var (details, totalMs) = await processor.RunBatchOcrAsync(2, (done, all) =>
+                var result = await processor.RunBatchOcrAsync(2, (done, all) =>
                 {
-                    // 进度回调，需在UI线程更新
-                    Dispatcher.Invoke(() =>
-                    {
-                        ProgressOcr.Value = all > 0 ? done * 100.0 / all : 0;
-                    });
+                    if (progressOcr != null)
+                        Dispatcher.Invoke(() =>
+                        {
+                            progressOcr.Value = all > 0 ? done * 100.0 / all : 0;
+                        });
                 });
-                return (details, totalMs);
+                return result;
             });
             var result = await task;
-            // 记录每个文件的识别结果
+
+            // 2. 结果分发：PDF输出合并txt，图片输出单文件txt
+            var imgToText = new Dictionary<string, List<string>>();
             foreach (var detail in result.details)
             {
                 string fileName = System.IO.Path.GetFileName(detail.ImgPath);
@@ -171,86 +228,79 @@ namespace PeachOCR
                         lines.Add(r.text);
                     }
                 }
-                fileResultMap[fileName] = lines;
+                imgToText[detail.ImgPath] = lines;
             }
-            ProgressOcr.Value = 100;
+            // PDF合并txt输出
+            var txtPaths = new List<string>();
+            foreach (var kv in pdfToTxtMap)
+            {
+                string pdfPath = kv.Key;
+                var imgs = kv.Value;
+                var allLines = new List<string>();
+                foreach (var img in imgs)
+                {
+                    if (imgToText.TryGetValue(img, out var lines))
+                        allLines.AddRange(lines);
+                }
+                // 输出txt到PDF同级同名.txt
+                string txtPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(pdfPath) ?? "", System.IO.Path.GetFileNameWithoutExtension(pdfPath) + ".txt");
+                System.IO.File.WriteAllLines(txtPath, allLines);
+                fileResultMap[System.IO.Path.GetFileName(pdfPath)] = allLines;
+                txtPaths.Add(txtPath);
+            }
+            // 普通图片单独txt输出
+            foreach (var img in imageFiles)
+            {
+                if (imgToText.TryGetValue(img, out var lines))
+                {
+                    string txtPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(img) ?? "", System.IO.Path.GetFileNameWithoutExtension(img) + ".txt");
+                    System.IO.File.WriteAllLines(txtPath, lines);
+                    fileResultMap[System.IO.Path.GetFileName(img)] = lines;
+                    txtPaths.Add(txtPath);
+                }
+            }
+
+            if (progressOcr != null) progressOcr.Value = 100;
+            // 计时结束
+            ocrWatch.Stop();
+            double seconds = ocrWatch.Elapsed.TotalSeconds;
             // 默认选中第一个文件并显示其结果
-            if (selectedImages.Count > 0)
+            if (selectedImages.Count > 0 && listImages != null)
             {
-                ListImages.SelectedIndex = 0;
+                listImages.SelectedIndex = 0;
                 var firstFile = System.IO.Path.GetFileName(selectedImages[0]);
-                if (fileResultMap.ContainsKey(firstFile))
-                    ListResults.ItemsSource = fileResultMap[firstFile];
+                if (fileResultMap.ContainsKey(firstFile) && listResultsTextBox != null)
+                    listResultsTextBox.Text = string.Join(Environment.NewLine, fileResultMap[firstFile]);
             }
-            BtnOcr.IsEnabled = true;
-            // 合并txt功能（自动保存到结果文件夹，无需弹窗）
-            if (CheckMergeTxt.IsChecked == true && result.details.Count > 0)
+            if (btnOcr != null) btnOcr.IsEnabled = true;
+            if (statusBarText != null)
             {
-                var sb = new StringBuilder();
-                foreach (var detail in result.details)
-                {
-                    if (detail.Result != null)
-                        sb.AppendLine(string.Join(" ", detail.Result.Select(r => r.text)));
-                }
-                string mergedDir = "";
-                if (selectedImages.Count > 0)
-                {
-                    string firstImg = selectedImages[0];
-                    string? parentDir = System.IO.Path.GetDirectoryName(firstImg);
-                    if (!string.IsNullOrEmpty(parentDir))
-                    {
-                        mergedDir = System.IO.Path.Combine(parentDir, "OCR_Result");
-                        if (!System.IO.Directory.Exists(mergedDir))
-                            System.IO.Directory.CreateDirectory(mergedDir);
-                        string savePath = System.IO.Path.Combine(mergedDir, "OCR_Result_Merged.txt");
-                        System.IO.File.WriteAllText(savePath, sb.ToString());
-                        lastMergedTxtPath = savePath;
-                    }
-                }
+                string txtInfo = txtPaths.Count == 1 ? txtPaths[0] : string.Join("; ", txtPaths);
+                statusBarText.Text = $"识别完成，耗时{seconds:F1}秒，结果txt路径：{txtInfo}";
             }
-            // 状态栏提示（耗时用秒，显示存储文件夹路径，自动推断）
-            double seconds = result.totalMs / 1000.0;
-            string resultDir = "(未合并txt)";
-            if (lastMergedTxtPath != null)
-            {
-                try
-                {
-                    resultDir = System.IO.Path.GetDirectoryName(lastMergedTxtPath) ?? lastMergedTxtPath;
-                }
-                catch { resultDir = lastMergedTxtPath; }
-            }
-            else if (selectedImages.Count > 0)
-            {
-                // 推断结果文件夹为用户输入图片的同级目录下的OCR_Result
-                string firstImg = selectedImages[0];
-                string? parentDir = System.IO.Path.GetDirectoryName(firstImg);
-                if (!string.IsNullOrEmpty(parentDir))
-                {
-                    resultDir = System.IO.Path.Combine(parentDir, "OCR_Result");
-                }
-            }
-            StatusBarText.Text = $"识别完成，耗时 {seconds:F2} 秒，识别结果存储于 {resultDir}";
         }
 
         // 文件列表选中项变化时，显示对应识别结果
         private void ListImages_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListImages.SelectedItem is string fileName)
+            var listImages = this.FindName("ListImages") as ListBox;
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            if (listImages?.SelectedItem is string fileName)
             {
-                // fileName 可能只是文件名
                 if (fileResultMap.TryGetValue(fileName, out var lines))
                 {
-                    ListResults.ItemsSource = lines;
+                    if (listResultsTextBox != null) listResultsTextBox.Text = string.Join(Environment.NewLine, lines);
                 }
                 else
                 {
-                    ListResults.ItemsSource = Array.Empty<string>();
+                    if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
                 }
             }
             else
             {
-                ListResults.ItemsSource = Array.Empty<string>();
+                if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
             }
         }
+
     }
 }
