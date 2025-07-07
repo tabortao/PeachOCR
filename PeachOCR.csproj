@@ -9,9 +9,9 @@
     <NoWarn>$(NoWarn) ;NU1701</NoWarn>
     <ApplicationIcon>Resources\app_icon.ico</ApplicationIcon>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>0.3.0</Version>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <FileVersion>0.3.0.0</FileVersion>
+    <Version>0.5.0</Version>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <FileVersion>0.5.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
