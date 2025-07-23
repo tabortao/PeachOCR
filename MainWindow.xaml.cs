@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using OCR;
+using PDF;
 
 namespace PeachOCR
 {
@@ -212,19 +213,20 @@ namespace PeachOCR
             {
                 foreach (var pdf in pdfFiles)
                 {
-                    // 输出目录与PDF同级，文件夹名同PDF名
                     string pdfDir = System.IO.Path.GetDirectoryName(pdf) ?? "";
                     string pdfName = System.IO.Path.GetFileNameWithoutExtension(pdf);
                     string outDir = System.IO.Path.Combine(pdfDir, pdfName);
-                    var options = new PDFToImage.ConvertOptions
+                    string imageFormat = "jpg";
+                    int dpi = 250;
+                    int jpegQuality = 90;
+                    // 统一输出目录为 outDir，确保 OcrBatchProcessor 能读取
+                    var pdfToImageTask = PDF.Convert.PDFToImagesAsync(new[] { pdf }, outDir, dpi, imageFormat, jpegQuality);
+                    await pdfToImageTask;
+                    List<string> imgs = new List<string>();
+                    if (System.IO.Directory.Exists(outDir))
                     {
-                        OutputDir = pdfDir,
-                        ImageFormat = "png",
-                        Dpi = 2000 // 设置高分辨率，2000 DPI
-                    };
-                    PDFToImage.Convert(pdf, options);
-                    // 收集该PDF转出的所有图片
-                    var imgs = System.IO.Directory.GetFiles(outDir, "page_*.png").OrderBy(f => f).ToList();
+                        imgs = System.IO.Directory.GetFiles(outDir, $"*_page_*.{imageFormat}").OrderBy(f => f).ToList();
+                    }
                     allOcrImages.AddRange(imgs);
                     pdfToTxtMap[pdf] = imgs;
                 }
