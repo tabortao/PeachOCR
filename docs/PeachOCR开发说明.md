@@ -8,8 +8,9 @@ cd PeachOCR
 dotnet add package OpenVINO.CSharp.API.Extensions.PaddleOCR
 dotnet add package OpenVINO.runtime.win
 dotnet add package OpenCvSharp4.runtime.win
-dotnet add package Docnet.Core #用于PDF转图片
-dotnet add package SixLabors.ImageSharp #用于PDF转图片
+# dotnet add package Docnet.Core #用于PDF转图片 删除，用PDFtoImage替换
+# dotnet add package SixLabors.ImageSharp #用于PDF转图片 删除，用PDFtoImage替换
+dotnet add package PDFtoImage #用于PDF转图片
 
 
 # 清理项目

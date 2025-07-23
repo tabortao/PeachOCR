@@ -9,9 +9,9 @@
     <NoWarn>$(NoWarn) ;NU1701</NoWarn>
     <ApplicationIcon>Resources\app_icon.ico</ApplicationIcon>
     <PackageIcon>icon.png</PackageIcon>
-    <Version>0.5.0</Version>
-    <AssemblyVersion>0.5.0.0</AssemblyVersion>
-    <FileVersion>0.5.0.0</FileVersion>
+    <Version>0.6.0</Version>
+    <AssemblyVersion>0.6.0.0</AssemblyVersion>
+    <FileVersion>0.6.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +19,7 @@
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
     <PackageReference Include="OpenVINO.CSharp.API.Extensions.PaddleOCR" Version="1.0.3" />
     <PackageReference Include="OpenVINO.runtime.win" Version="2025.0.0.1" />
+    <PackageReference Include="PDFtoImage" Version="5.1.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
     <Resource Include="Resources\\app_icon.ico" />
     <Resource Include="Resources\\icon.png" />
