@@ -57,5 +57,11 @@ dotnet run --no-build
 ## 依赖模型
 - `models/ch_PP-OCRv4/` 及 `models/ch_PP-OCRv5/` 下需放置对应 onnx 模型和字典文件
 
-## 🙏感谢
+## 感谢
 - [PaddleOCR-OpenVINO-CSharp](https://github.com/guojin-yan/PaddleOCR-OpenVINO-CSharp)
+
+## 软件下载
+
+- 欢迎关注公众号“可持续学园”，回复“PeachOCR”获取最新软件下载地址。
+
+![微信公众号](./docs/images/微信公众号.jpg)
