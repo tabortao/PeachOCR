@@ -365,7 +365,7 @@
                     </ComboBox>
                     
                     <CheckBox x:Name="CheckMergeTxt" Content="合并为单个文件" Margin="15,0,0,0"/>
-                    <CheckBox x:Name="CheckSaveResult" Content="保存处理图片" IsChecked="True" Margin="15,0,0,0"/>
+                    <CheckBox x:Name="CheckSaveResult" Content="保存处理图片" IsChecked="False" Margin="15,0,0,0"/>
                     <CheckBox x:Name="CheckGpu" Content="启用GPU加速" Margin="15,0,0,0"/>
                 </StackPanel>
                 

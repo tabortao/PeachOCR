@@ -69,7 +69,7 @@ namespace PeachOCR
             InitializeComponent();
             // 初始化控件状态（全部用FindName方式访问，避免partial字段丢失问题）
             var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
-            if (checkSaveResult != null) checkSaveResult.IsChecked = true;
+            if (checkSaveResult != null) checkSaveResult.IsChecked = false;
             var checkMergeTxt = this.FindName("CheckMergeTxt") as CheckBox;
             if (checkMergeTxt != null) checkMergeTxt.IsChecked = false;
             var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
