@@ -3,7 +3,10 @@
     "allow": [
       "Bash(dotnet list:*)",
       "Bash(dotnet add:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run:*)",
+      "Bash(taskkill /f /im PeachOCR.exe)",
+      "Bash(taskkill /f /pid 1820)"
     ]
   }
 }

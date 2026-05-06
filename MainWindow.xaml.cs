@@ -359,5 +359,45 @@ namespace PeachOCR
             }
         }
 
+        // 右键菜单：删除选中的文件
+        private void MenuItem_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            var listImages = this.FindName("ListImages") as ListBox;
+            if (listImages?.SelectedIndex is int idx && idx >= 0 && idx < selectedImages.Count)
+            {
+                // 先获取要删除的文件名
+                string deletedFileName = System.IO.Path.GetFileName(selectedImages[idx]);
+
+                // 删除选中项
+                selectedImages.RemoveAt(idx);
+
+                // 更新ListBox显示
+                if (listImages != null)
+                {
+                    listImages.ItemsSource = null;
+                    listImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
+                }
+
+                // 更新文件状态显示
+                var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
+                if (txtFileStatus != null)
+                    txtFileStatus.Text = selectedImages.Count > 0 ? $"已选择 {selectedImages.Count} 个文件" : "未选择文件";
+
+                // 清除结果
+                var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+                if (listResultsTextBox != null)
+                    listResultsTextBox.Text = string.Empty;
+
+                // 从结果映射中删除对应项
+                if (!string.IsNullOrEmpty(deletedFileName))
+                {
+                    fileResultMap.Remove(deletedFileName);
+                }
+
+                // 更新空提示
+                UpdateListImagesHint();
+            }
+        }
+
     }
 }

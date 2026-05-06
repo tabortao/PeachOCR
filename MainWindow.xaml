@@ -304,7 +304,29 @@
                                      VerticalAlignment="Stretch"
                                      BorderThickness="1" BorderBrush="#666" Margin="0,0,0,0"
                                      SelectionChanged="ListImages_SelectionChanged"
-                                     AllowDrop="True" PreviewDragOver="ListImages_PreviewDragOver" Drop="ListImages_Drop"/>
+                                     AllowDrop="True" PreviewDragOver="ListImages_PreviewDragOver" Drop="ListImages_Drop">
+                                <ListBox.ContextMenu>
+                                    <ContextMenu Background="#2D2D2D" BorderBrush="#3E3E3E" BorderThickness="1">
+                                        <ContextMenu.Resources>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="Foreground" Value="#E0E0E0"/>
+                                                <Setter Property="Background" Value="#2D2D2D"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#3A3A3A"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContextMenu.Resources>
+                                        <MenuItem Header="删除" Click="MenuItem_Delete_Click">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="🗑️" FontSize="14" VerticalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </ListBox.ContextMenu>
+                            </ListBox>
                             <TextBlock x:Name="ListImagesEmptyHint"
                                        Text="可直接拖入要识别的图片或PDF"
                                        Foreground="#888"
