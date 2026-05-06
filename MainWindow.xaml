@@ -346,25 +346,38 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="识别结果" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
-                        <TextBox x:Name="ListResultsTextBox"
-                                 Grid.Row="1"
-                                 VerticalAlignment="Stretch"
-                                 VerticalScrollBarVisibility="Auto"
-                                 HorizontalScrollBarVisibility="Auto"
-                                 TextWrapping="Wrap"
-                                 AcceptsReturn="True"
-                                 IsReadOnly="True"
-                                 Background="#252525"
-                                 Foreground="#E0E0E0"
-                                 BorderBrush="#666"
-                                 BorderThickness="1"
-                                 FontSize="14"
-                                 FontFamily="Segoe UI, Microsoft YaHei, Arial"
-                                 Margin="0,0,0,0"
-                                 Padding="4,2,4,2"
-                                 MouseDoubleClick="ListResultsTextBox_MouseDoubleClick"
-                                 />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="识别结果" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                            <Button x:Name="BtnAIEnhance" Content="🤖"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Margin="0,0,0,10" Width="32" Height="32"
+                                    Style="{StaticResource SecondaryButton}" FontSize="16"
+                                    Click="BtnAIEnhance_Click" ToolTip="AI增强"/>
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <TextBox x:Name="ListResultsTextBox"
+                                     VerticalAlignment="Stretch"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     IsReadOnly="True"
+                                     Background="#252525"
+                                     Foreground="#E0E0E0"
+                                     BorderBrush="#666"
+                                     BorderThickness="1"
+                                     FontSize="14"
+                                     FontFamily="Segoe UI, Microsoft YaHei, Arial"
+                                     Margin="0,0,0,0"
+                                     Padding="4,2,4,2"
+                                     MouseDoubleClick="ListResultsTextBox_MouseDoubleClick"
+                                     />
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>
@@ -389,6 +402,8 @@
                     <CheckBox x:Name="CheckMergeTxt" Content="合并为单个文件" Margin="15,0,0,0"/>
                     <CheckBox x:Name="CheckSaveResult" Content="保存处理图片" IsChecked="False" Margin="15,0,0,0"/>
                     <CheckBox x:Name="CheckGpu" Content="启用GPU加速" Margin="15,0,0,0"/>
+                    <Button x:Name="BtnAISettings" Content="⚙️" Margin="10,0,0,0" Width="32" Height="32"
+                            Style="{StaticResource SecondaryButton}" ToolTip="AI设置" Click="BtnAISettings_Click"/>
                 </StackPanel>
                 
                 <!-- 操作按钮 -->

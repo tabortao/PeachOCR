@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using OCR;
 using PDF;
+using Microsoft.Extensions.AI;
 
 namespace PeachOCR
 {
@@ -26,6 +27,9 @@ namespace PeachOCR
         private List<string> selectedImages = new();
         // 存储每个文件的识别结果
         private Dictionary<string, List<string>> fileResultMap = new();
+        // AI相关字段
+        private AISettings? _aiSettings;
+        private AIService? _aiService;
         // 注意：不要声明任何和XAML控件同名的字段，否则会导致自动生成失效
 
         // 双击识别结果区域，打开对应的txt文件
@@ -67,6 +71,10 @@ namespace PeachOCR
         public MainWindow()
         {
             InitializeComponent();
+
+            // 初始化AI设置
+            LoadAISettings();
+
             // 初始化控件状态（全部用FindName方式访问，避免partial字段丢失问题）
             var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
             if (checkSaveResult != null) checkSaveResult.IsChecked = false;
@@ -399,5 +407,113 @@ namespace PeachOCR
             }
         }
 
+        // AI相关方法
+        private void LoadAISettings()
+        {
+            _aiSettings = new AISettings
+            {
+                ServiceProvider = Properties.Settings.Default.AIServiceProvider,
+                ApiUrl = Properties.Settings.Default.AIApiUrl,
+                ApiKey = Properties.Settings.Default.AIApiKey,
+                ModelName = Properties.Settings.Default.AIModelName,
+                OcrEnhancementPrompt = Properties.Settings.Default.AIOcrEnhancementPrompt,
+                AnalysisPrompt = Properties.Settings.Default.AIAnalysisPrompt,
+                TranslationPrompt = Properties.Settings.Default.AITranslationPrompt
+            }!;
+        }
+
+        private void SaveAISettings()
+        {
+            if (_aiSettings == null) return;
+
+            Properties.Settings.Default.AIServiceProvider = _aiSettings.ServiceProvider;
+            Properties.Settings.Default.AIApiUrl = _aiSettings.ApiUrl;
+            Properties.Settings.Default.AIApiKey = _aiSettings.ApiKey;
+            Properties.Settings.Default.AIModelName = _aiSettings.ModelName;
+            Properties.Settings.Default.AIOcrEnhancementPrompt = _aiSettings.OcrEnhancementPrompt;
+            Properties.Settings.Default.AIAnalysisPrompt = _aiSettings.AnalysisPrompt;
+            Properties.Settings.Default.AITranslationPrompt = _aiSettings.TranslationPrompt;
+            Properties.Settings.Default.Save();
+        }
+
+        private void BtnAISettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (_aiSettings == null) return;
+
+            var settingsWindow = new AISettingsWindow(_aiSettings);
+            if (settingsWindow.ShowDialog() == true)
+            {
+                SaveAISettings();
+                // 重置AI服务以使用新设置
+                _aiService?.Dispose();
+                _aiService = null;
+            }
+        }
+
+        private async void BtnAIEnhance_Click(object sender, RoutedEventArgs e)
+        {
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+
+            if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
+            {
+                MessageBox.Show("请先进行OCR识别以获取文本内容", "无内容可处理", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (_aiSettings == null || !_aiSettings.IsConfigured)
+            {
+                var result = MessageBox.Show("AI功能尚未配置，是否现在配置？", "AI配置", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    BtnAISettings_Click(sender, e);
+                    if (_aiSettings == null || !_aiSettings.IsConfigured)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                if (statusBarText != null) statusBarText.Text = "正在使用AI优化文本...";
+
+                // 创建或获取AI服务
+                if (_aiService == null)
+                {
+                    _aiService = new AIService(_aiSettings);
+                }
+
+                string originalText = listResultsTextBox.Text;
+                string enhancedText = await _aiService.EnhanceOCRTextAsync(originalText);
+
+                if (!string.IsNullOrEmpty(enhancedText))
+                {
+                    listResultsTextBox.Text = enhancedText;
+                    if (statusBarText != null) statusBarText.Text = "AI文本优化完成";
+                }
+                else
+                {
+                    MessageBox.Show("AI处理未返回结果，请检查API配置", "处理失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    if (statusBarText != null) statusBarText.Text = "AI处理失败";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"AI处理失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (statusBarText != null) statusBarText.Text = $"AI处理错误：{ex.Message}";
+            }
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            // 清理AI服务资源
+            _aiService?.Dispose();
+            base.OnClosing(e);
+        }
     }
 }

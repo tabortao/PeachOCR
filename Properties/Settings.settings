@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
+  <Profiles>
+    <Profile Name="(Default)" />
+  </Profiles>
+  <Settings>
+    <Setting Name="AIServiceProvider" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OpenAI兼容</Value>
+    </Setting>
+    <Setting Name="AIApiUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://api.openai.com/v1</Value>
+    </Setting>
+    <Setting Name="AIApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="AIModelName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">gpt-3.5-turbo</Value>
+    </Setting>
+    <Setting Name="AIOcrEnhancementPrompt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">请对以下OCR识别结果进行优化：
+1. 纠正错别字和识别错误
+2. 优化文本排版和格式
+3. 根据语义进行合理的段落划分
+4. 保持原文意思不变
+
+OCR识别结果：</Value>
+    </Setting>
+    <Setting Name="AIAnalysisPrompt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">请对以下文本进行分析和总结：
+1. 提取关键信息
+2. 总结主要内容
+3. 识别重要数据或要点
+4. 以清晰的结构呈现
+
+需要分析的文本：</Value>
+    </Setting>
+    <Setting Name="AITranslationPrompt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">请将以下文本翻译成中文：
+1. 保持专业术语的准确性
+2. 确保翻译的流畅性和可读性
+3. 保持原文的格式和结构
+
+需要翻译的文本：</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
