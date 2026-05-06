@@ -6,6 +6,11 @@
 - <https://aistudio.baidu.com/paddleocr>
 - 新增Windows本地OCR功能
 
+### 0.8.0 - 2026-05-06
+
+- 把项目从.NET 8 升级到了.NET 10
+
+
 ### v0.7.0 - 2026-05-06
 
 - 更新项目依赖包至最新版本，包括OpenCvSharp4、OpenVINO和PDFtoImage
