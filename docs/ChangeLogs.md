@@ -9,6 +9,10 @@
 
 ### 0.8.1 - 2026-05-06
 
+> 需要安装 .NET 10 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/10.0)
+
+![PeachOCR-UI](https://github.com/user-attachments/assets/08947dc5-1c1e-407f-a2a6-6d616b496ab0)
+
 #### AI功能增强
 - **feat(AI)**: 实现右键菜单功能并自动保存处理结果
 - **feat(AI)**: 添加右键菜单的AI OCR增强功能
@@ -30,6 +34,8 @@
 
 ### 0.8.0 - 2026-05-06
 
+> 需要安装 .NET 10 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/10.0)
+
 #### 框架升级
 - **upgrade**: 将项目从.NET 8升级到.NET 10
 - **update**: 更新项目版本号至0.8.0
@@ -42,6 +48,8 @@
   - 支持自定义提示词模板
 
 ### 0.7.0 - 2026-05-06
+
+> 需要安装 .NET 8 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0)
 
 #### 依赖更新
 - **update**: 更新项目依赖包至最新版本
@@ -64,6 +72,10 @@
   - 改进内存管理
 
 ### 0.5.0 - 2025-07-07
+
+> 需要安装 .NET 8 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0)
+
+![PeachOCR-UI](https://github.com/user-attachments/assets/020efca7-3cfe-4bdc-b518-78ff2ef809e8)
 
 #### 用户体验
 - **fix(UI)**: 修复UI显示不全的问题

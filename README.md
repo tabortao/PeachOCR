@@ -4,7 +4,7 @@ PeachOCR 是一个基于 .NET 10 WPF 框架开发的本地批量图片/PDF文字
 
 关注公众号“**可持续学园**”，回复“**PeachOCR**”，获取软件下载地址。
 
-![PeachOCR-UI](https://github.com/user-attachments/assets/63c8c3c4-5fda-4ebd-879d-7fc2d47eed16)
+![PeachOCR-UI](https://github.com/user-attachments/assets/08947dc5-1c1e-407f-a2a6-6d616b496ab0)
 
 ## 主要特性
 
