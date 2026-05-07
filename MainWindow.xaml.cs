@@ -618,11 +618,11 @@ namespace PeachOCR
                     // 更新fileResultMap并保存到文件
                     if (listImages?.SelectedItem is string fileName)
                     {
-                        var lines = new List<string>(enhancedText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+                        var lines = new List<string>(enhancedText?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? Array.Empty<string>());
                         fileResultMap[fileName] = lines;
 
                         // 保存到对应的txt文件
-                        string originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
+                        string? originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
                         if (!string.IsNullOrEmpty(originalFilePath))
                         {
                             string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
@@ -725,11 +725,11 @@ namespace PeachOCR
                     // 更新fileResultMap并保存到文件
                     if (listImages?.SelectedItem is string fileName)
                     {
-                        var lines = new List<string>(finalText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+                        var lines = new List<string>(finalText?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? Array.Empty<string>());
                         fileResultMap[fileName] = lines;
 
                         // 保存到对应的txt文件
-                        string originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
+                        string? originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
                         if (!string.IsNullOrEmpty(originalFilePath))
                         {
                             string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
@@ -809,11 +809,11 @@ namespace PeachOCR
                     // 更新fileResultMap并保存到文件
                     if (listImages?.SelectedItem is string fileName)
                     {
-                        var lines = new List<string>(finalText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+                        var lines = new List<string>(finalText?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? Array.Empty<string>());
                         fileResultMap[fileName] = lines;
 
                         // 保存到对应的txt文件
-                        string originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
+                        string? originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
                         if (!string.IsNullOrEmpty(originalFilePath))
                         {
                             string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
