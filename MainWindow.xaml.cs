@@ -571,6 +571,7 @@ namespace PeachOCR
         private async void MenuItem_EnhanceOCR_Click(object sender, RoutedEventArgs e)
         {
             var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var listImages = this.FindName("ListImages") as ListBox;
             var statusBarText = this.FindName("StatusBarText") as TextBlock;
 
             if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
@@ -613,7 +614,27 @@ namespace PeachOCR
                 {
                     // 替换原文本为增强后的文本
                     listResultsTextBox.Text = enhancedText;
-                    if (statusBarText != null) statusBarText.Text = "AI OCR增强完成";
+
+                    // 更新fileResultMap并保存到文件
+                    if (listImages?.SelectedItem is string fileName)
+                    {
+                        var lines = new List<string>(enhancedText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+                        fileResultMap[fileName] = lines;
+
+                        // 保存到对应的txt文件
+                        string originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
+                        if (!string.IsNullOrEmpty(originalFilePath))
+                        {
+                            string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
+                            string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                            string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(originalFilePath) + ".txt");
+
+                            System.IO.Directory.CreateDirectory(resultDir);
+                            System.IO.File.WriteAllLines(txtPath, lines);
+                        }
+                    }
+
+                    if (statusBarText != null) statusBarText.Text = "AI OCR增强完成并已保存";
                 }
                 else
                 {
@@ -655,6 +676,7 @@ namespace PeachOCR
         private async void MenuItem_AnalyzeText_Click(object sender, RoutedEventArgs e)
         {
             var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var listImages = this.FindName("ListImages") as ListBox;
             var statusBarText = this.FindName("StatusBarText") as TextBlock;
 
             if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
@@ -697,8 +719,29 @@ namespace PeachOCR
                 {
                     // 在原文后添加分析结果
                     string separator = "\n\n═══════════════════════════════════\nAI分析总结\n═══════════════════════════════════\n";
-                    listResultsTextBox.Text = originalText + separator + analysisResult;
-                    if (statusBarText != null) statusBarText.Text = "AI分析总结完成";
+                    string finalText = originalText + separator + analysisResult;
+                    listResultsTextBox.Text = finalText;
+
+                    // 更新fileResultMap并保存到文件
+                    if (listImages?.SelectedItem is string fileName)
+                    {
+                        var lines = new List<string>(finalText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+                        fileResultMap[fileName] = lines;
+
+                        // 保存到对应的txt文件
+                        string originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
+                        if (!string.IsNullOrEmpty(originalFilePath))
+                        {
+                            string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
+                            string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                            string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(originalFilePath) + ".txt");
+
+                            System.IO.Directory.CreateDirectory(resultDir);
+                            System.IO.File.WriteAllLines(txtPath, lines);
+                        }
+                    }
+
+                    if (statusBarText != null) statusBarText.Text = "AI分析总结完成并已保存";
                 }
                 else
                 {
@@ -717,6 +760,7 @@ namespace PeachOCR
         private async void MenuItem_TranslateText_Click(object sender, RoutedEventArgs e)
         {
             var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var listImages = this.FindName("ListImages") as ListBox;
             var statusBarText = this.FindName("StatusBarText") as TextBlock;
 
             if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
@@ -759,8 +803,29 @@ namespace PeachOCR
                 {
                     // 在原文后添加翻译结果
                     string separator = "\n\n═══════════════════════════════════\nAI翻译结果\n═══════════════════════════════════\n";
-                    listResultsTextBox.Text = originalText + separator + translationResult;
-                    if (statusBarText != null) statusBarText.Text = "AI翻译完成";
+                    string finalText = originalText + separator + translationResult;
+                    listResultsTextBox.Text = finalText;
+
+                    // 更新fileResultMap并保存到文件
+                    if (listImages?.SelectedItem is string fileName)
+                    {
+                        var lines = new List<string>(finalText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None));
+                        fileResultMap[fileName] = lines;
+
+                        // 保存到对应的txt文件
+                        string originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
+                        if (!string.IsNullOrEmpty(originalFilePath))
+                        {
+                            string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
+                            string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                            string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(originalFilePath) + ".txt");
+
+                            System.IO.Directory.CreateDirectory(resultDir);
+                            System.IO.File.WriteAllLines(txtPath, lines);
+                        }
+                    }
+
+                    if (statusBarText != null) statusBarText.Text = "AI翻译完成并已保存";
                 }
                 else
                 {
