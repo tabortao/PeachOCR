@@ -567,6 +567,67 @@ namespace PeachOCR
             }
         }
 
+        // 右键菜单：AI OCR增强
+        private async void MenuItem_EnhanceOCR_Click(object sender, RoutedEventArgs e)
+        {
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+
+            if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
+            {
+                MessageBox.Show("请先进行OCR识别以获取文本内容", "无内容可增强", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (_aiSettings == null || !_aiSettings.IsConfigured)
+            {
+                var result = MessageBox.Show("AI功能尚未配置，是否现在配置？", "AI配置", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    BtnAISettings_Click(sender, e);
+                    if (_aiSettings == null || !_aiSettings.IsConfigured)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                if (statusBarText != null) statusBarText.Text = "正在使用AI增强OCR文本...";
+
+                // 创建或获取AI服务
+                if (_aiService == null)
+                {
+                    _aiService = new AIService(_aiSettings);
+                }
+
+                string originalText = listResultsTextBox.Text;
+                string enhancedText = await _aiService.EnhanceOCRTextAsync(originalText);
+
+                if (!string.IsNullOrEmpty(enhancedText))
+                {
+                    // 替换原文本为增强后的文本
+                    listResultsTextBox.Text = enhancedText;
+                    if (statusBarText != null) statusBarText.Text = "AI OCR增强完成";
+                }
+                else
+                {
+                    MessageBox.Show("AI OCR增强未返回结果，请检查API配置", "增强失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    if (statusBarText != null) statusBarText.Text = "AI OCR增强失败";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"AI OCR增强失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (statusBarText != null) statusBarText.Text = $"AI OCR增强错误：{ex.Message}";
+            }
+        }
+
         // 右键菜单：复制文本
         private void MenuItem_CopyText_Click(object sender, RoutedEventArgs e)
         {

@@ -299,7 +299,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <TextBlock Text="待处理文件列表" Style="{StaticResource SectionTitle}"/>
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="1" VerticalAlignment="Stretch">
                             <ListBox x:Name="ListImages"
                                      VerticalAlignment="Stretch"
                                      BorderThickness="1" BorderBrush="#666" Margin="0,0,0,0"
@@ -351,20 +351,10 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <TextBlock Text="识别结果" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
-                            <Button x:Name="BtnAIEnhance" Content="🤖"
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    Margin="0,0,0,10" Width="32" Height="32"
-                                    Style="{StaticResource SecondaryButton}" FontSize="16"
-                                    Click="BtnAIEnhance_Click" ToolTip="AI增强"/>
-                        </Grid>
-                        <Grid Grid.Row="1">
+                        </StackPanel>
+                        <Grid Grid.Row="1" VerticalAlignment="Stretch">
                             <TextBox x:Name="ListResultsTextBox"
                                      VerticalAlignment="Stretch"
                                      VerticalScrollBarVisibility="Auto"
@@ -402,6 +392,11 @@
                                             </MenuItem.Icon>
                                         </MenuItem>
                                         <Separator Background="#3E3E3E"/>
+                                        <MenuItem Header="AI OCR增强" Click="MenuItem_EnhanceOCR_Click">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="🔍" FontSize="14" VerticalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
                                         <MenuItem Header="AI分析总结" Click="MenuItem_AnalyzeText_Click">
                                             <MenuItem.Icon>
                                                 <TextBlock Text="📊" FontSize="14" VerticalAlignment="Center"/>
