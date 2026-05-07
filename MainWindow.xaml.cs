@@ -567,6 +567,153 @@ namespace PeachOCR
             }
         }
 
+        // 右键菜单：复制文本
+        private void MenuItem_CopyText_Click(object sender, RoutedEventArgs e)
+        {
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            if (listResultsTextBox != null && !string.IsNullOrEmpty(listResultsTextBox.Text))
+            {
+                try
+                {
+                    Clipboard.SetText(listResultsTextBox.Text);
+                    var statusBarText = this.FindName("StatusBarText") as TextBlock;
+                    if (statusBarText != null) statusBarText.Text = "文本已复制到剪贴板";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"复制失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("没有可复制的文本内容", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        // 右键菜单：AI分析总结
+        private async void MenuItem_AnalyzeText_Click(object sender, RoutedEventArgs e)
+        {
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+
+            if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
+            {
+                MessageBox.Show("请先进行OCR识别以获取文本内容", "无内容可分析", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (_aiSettings == null || !_aiSettings.IsConfigured)
+            {
+                var result = MessageBox.Show("AI功能尚未配置，是否现在配置？", "AI配置", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    BtnAISettings_Click(sender, e);
+                    if (_aiSettings == null || !_aiSettings.IsConfigured)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                if (statusBarText != null) statusBarText.Text = "正在使用AI分析总结...";
+
+                // 创建或获取AI服务
+                if (_aiService == null)
+                {
+                    _aiService = new AIService(_aiSettings);
+                }
+
+                string originalText = listResultsTextBox.Text;
+                string analysisResult = await _aiService.AnalyzeTextAsync(originalText);
+
+                if (!string.IsNullOrEmpty(analysisResult))
+                {
+                    // 在原文后添加分析结果
+                    string separator = "\n\n═══════════════════════════════════\nAI分析总结\n═══════════════════════════════════\n";
+                    listResultsTextBox.Text = originalText + separator + analysisResult;
+                    if (statusBarText != null) statusBarText.Text = "AI分析总结完成";
+                }
+                else
+                {
+                    MessageBox.Show("AI分析未返回结果，请检查API配置", "分析失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    if (statusBarText != null) statusBarText.Text = "AI分析失败";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"AI分析失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (statusBarText != null) statusBarText.Text = $"AI分析错误：{ex.Message}";
+            }
+        }
+
+        // 右键菜单：AI翻译
+        private async void MenuItem_TranslateText_Click(object sender, RoutedEventArgs e)
+        {
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+
+            if (listResultsTextBox == null || string.IsNullOrWhiteSpace(listResultsTextBox.Text))
+            {
+                MessageBox.Show("请先进行OCR识别以获取文本内容", "无内容可翻译", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (_aiSettings == null || !_aiSettings.IsConfigured)
+            {
+                var result = MessageBox.Show("AI功能尚未配置，是否现在配置？", "AI配置", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    BtnAISettings_Click(sender, e);
+                    if (_aiSettings == null || !_aiSettings.IsConfigured)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            try
+            {
+                if (statusBarText != null) statusBarText.Text = "正在使用AI翻译...";
+
+                // 创建或获取AI服务
+                if (_aiService == null)
+                {
+                    _aiService = new AIService(_aiSettings);
+                }
+
+                string originalText = listResultsTextBox.Text;
+                string translationResult = await _aiService.TranslateTextAsync(originalText);
+
+                if (!string.IsNullOrEmpty(translationResult))
+                {
+                    // 在原文后添加翻译结果
+                    string separator = "\n\n═══════════════════════════════════\nAI翻译结果\n═══════════════════════════════════\n";
+                    listResultsTextBox.Text = originalText + separator + translationResult;
+                    if (statusBarText != null) statusBarText.Text = "AI翻译完成";
+                }
+                else
+                {
+                    MessageBox.Show("AI翻译未返回结果，请检查API配置", "翻译失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    if (statusBarText != null) statusBarText.Text = "AI翻译失败";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"AI翻译失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (statusBarText != null) statusBarText.Text = $"AI翻译错误：{ex.Message}";
+            }
+        }
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             // 清理AI服务资源

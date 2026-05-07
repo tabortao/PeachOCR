@@ -381,7 +381,40 @@
                                      Margin="0,0,0,0"
                                      Padding="4,2,4,2"
                                      MouseDoubleClick="ListResultsTextBox_MouseDoubleClick"
-                                     />
+                                     >
+                                <TextBox.ContextMenu>
+                                    <ContextMenu Background="#2D2D2D" BorderBrush="#3E3E3E" BorderThickness="1">
+                                        <ContextMenu.Resources>
+                                            <Style TargetType="MenuItem">
+                                                <Setter Property="Foreground" Value="#E0E0E0"/>
+                                                <Setter Property="Background" Value="#2D2D2D"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#3A3A3A"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContextMenu.Resources>
+                                        <MenuItem Header="复制文本" Click="MenuItem_CopyText_Click">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="📋" FontSize="14" VerticalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator Background="#3E3E3E"/>
+                                        <MenuItem Header="AI分析总结" Click="MenuItem_AnalyzeText_Click">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="📊" FontSize="14" VerticalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="AI翻译" Click="MenuItem_TranslateText_Click">
+                                            <MenuItem.Icon>
+                                                <TextBlock Text="🌐" FontSize="14" VerticalAlignment="Center"/>
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </TextBox.ContextMenu>
+                            </TextBox>
                         </Grid>
                     </Grid>
                 </Grid>
