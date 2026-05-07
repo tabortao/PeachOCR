@@ -326,6 +326,11 @@
                                         </MenuItem>
                                     </ContextMenu>
                                 </ListBox.ContextMenu>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <EventSetter Event="MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
                             </ListBox>
                             <TextBlock x:Name="ListImagesEmptyHint"
                                        Text="可直接拖入要识别的图片或PDF"

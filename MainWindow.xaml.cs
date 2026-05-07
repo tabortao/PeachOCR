@@ -184,6 +184,64 @@ namespace PeachOCR
             if (listImagesEmptyHint != null)
                 listImagesEmptyHint.Visibility = (selectedImages.Count == 0) ? Visibility.Visible : Visibility.Collapsed;
         }
+        // 双击文件列表中的文件，使用系统默认程序打开
+        private void ListImages_PreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var listImages = this.FindName("ListImages") as ListBox;
+            if (listImages?.SelectedIndex is int idx && idx >= 0 && idx < selectedImages.Count)
+            {
+                string filePath = selectedImages[idx];
+                if (System.IO.File.Exists(filePath))
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                        {
+                            FileName = filePath,
+                            UseShellExecute = true
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"无法打开文件：{filePath}\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show($"文件不存在：{filePath}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // ListBox项的双击事件处理
+        private void ListBoxItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var listImages = this.FindName("ListImages") as ListBox;
+            if (listImages?.SelectedIndex is int idx && idx >= 0 && idx < selectedImages.Count)
+            {
+                string filePath = selectedImages[idx];
+                if (System.IO.File.Exists(filePath))
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                        {
+                            FileName = filePath,
+                            UseShellExecute = true
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"无法打开文件：{filePath}\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show($"文件不存在：{filePath}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
         // 已废弃字段：lastMergedTxtPath
         private async void BtnOcr_Click(object sender, RoutedEventArgs e)
         {
