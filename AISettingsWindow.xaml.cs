@@ -49,7 +49,9 @@ namespace PeachOCR
             {
                 _settings.ServiceProvider = "DeepSeek";
                 _settings.ApiUrl = "https://api.deepseek.com";
-                _settings.ModelName = "deepseek-chat";
+                // Allow custom model name for DeepSeek, use deepseek-v4-flash as default if empty
+                string modelName = TxtModelName.Text.Trim();
+                _settings.ModelName = string.IsNullOrWhiteSpace(modelName) ? "deepseek-v4-flash" : modelName;
                 TxtApiUrl.Text = _settings.ApiUrl;
                 TxtModelName.Text = _settings.ModelName;
             }
@@ -122,9 +124,13 @@ namespace PeachOCR
             if (ComboServiceProvider.SelectedIndex == 1) // DeepSeek
             {
                 TxtApiUrl.Text = "https://api.deepseek.com";
-                TxtModelName.Text = "deepseek-chat";
+                // Use deepseek-v4-flash as default but allow user customization
+                if (string.IsNullOrWhiteSpace(TxtModelName.Text) || TxtModelName.Text == "gpt-3.5-turbo")
+                {
+                    TxtModelName.Text = "deepseek-v4-flash";
+                }
                 TxtApiUrl.IsEnabled = false;
-                TxtModelName.IsEnabled = false;
+                TxtModelName.IsEnabled = true; // Allow custom model names
             }
             else // OpenAI compatible
             {
@@ -161,7 +167,15 @@ namespace PeachOCR
 
             if (result == MessageBoxResult.Yes)
             {
-                _settings.ResetToDefaults();
+                // Reset based on current service provider
+                if (ComboServiceProvider.SelectedIndex == 1) // DeepSeek
+                {
+                    _settings.ResetToDeepSeekDefaults();
+                }
+                else
+                {
+                    _settings.ResetToDefaults();
+                }
                 LoadSettings();
             }
         }

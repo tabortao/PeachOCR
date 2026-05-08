@@ -85,5 +85,16 @@ namespace PeachOCR
             AnalysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
             TranslationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
         }
+
+        public void ResetToDeepSeekDefaults()
+        {
+            ServiceProvider = "DeepSeek";
+            ApiUrl = "https://api.deepseek.com";
+            ApiKey = string.Empty;
+            ModelName = "deepseek-v4-flash"; // Default DeepSeek model
+            OcrEnhancementPrompt = "请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：";
+            AnalysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
+            TranslationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
+        }
     }
 }

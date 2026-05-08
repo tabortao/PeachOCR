@@ -7,7 +7,12 @@
 - 新增Windows本地OCR功能
 - 探索更多AI功能集成可能性
 
-### 0.8.1 - 2026-05-06
+### 0.8.2 - 2026-05-08
+
+- feat(AI设置): 添加DeepSeek支持并优化模型选择逻辑，允许用户自定义DeepSeek模型名称，默认使用deepseek-v4-flash
+
+
+### 0.8.1 - 2026-05-07
 
 > 需要安装 .NET 10 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/10.0)
 
