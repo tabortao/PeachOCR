@@ -202,6 +202,37 @@
                     </StackPanel>
                 </Border>
 
+                <!-- AI OCR配置 -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="AI OCR配置" Style="{StaticResource SectionTitle}"/>
+
+                        <Label Content="OCR服务提供商："/>
+                        <ComboBox x:Name="ComboOcrServiceProvider" SelectedIndex="0" SelectionChanged="ComboOcrServiceProvider_SelectionChanged">
+                            <ComboBoxItem Content="PaddleOCR（在线）"/>
+                            <ComboBoxItem Content="硅基流动"/>
+                        </ComboBox>
+
+                        <Label Content="OCR API地址："/>
+                        <TextBox x:Name="TxtOcrApiUrl" ToolTip="OCR服务商的API地址或JOB_URL"/>
+
+                        <Label Content="API密钥："/>
+                        <PasswordBox x:Name="PwdOcrApiKey" ToolTip="OCR服务商的TOKEN或API密钥"/>
+
+                        <Label Content="OCR模型："/>
+                        <TextBox x:Name="TxtOcrModel" ToolTip="OCR服务商支持的模型名称"/>
+
+                        <TextBlock Text="推荐配置：\n• PaddleOCR（在线）：默认模型 PaddleOCR-VL-1.5\n• 硅基流动：推荐 Qwen/Qwen3-VL-235B-A22B-Instruct 或 PaddlePaddle/PaddleOCR-VL-1.5"
+                                   FontSize="12" Foreground="#A0A0A0" Margin="0,5,0,10" TextWrapping="Wrap"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button x:Name="BtnTestOcrConnection" Content="测试OCR连接"
+                                    Style="{StaticResource PrimaryButton}" Click="BtnTestOcrConnection_Click"/>
+                            <TextBlock x:Name="TxtOcrConnectionStatus" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
                 <!-- 保存文件类型配置 -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>

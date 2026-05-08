@@ -45,5 +45,17 @@ OCR识别结果：</Value>
     <Setting Name="AIOutputFileFormat" Type="System.String" Scope="User">
       <Value Profile="(Default)">txt标准格式</Value>
     </Setting>
+    <Setting Name="OCRServiceProvider" Type="System.String" Scope="User">
+      <Value Profile="(Default)">PaddleOCR（在线）</Value>
+    </Setting>
+    <Setting Name="OCRApiUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://paddleocr.aistudio-app.com/api/v2/ocr/jobs</Value>
+    </Setting>
+    <Setting Name="OCRApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="OCRModel" Type="System.String" Scope="User">
+      <Value Profile="(Default)">PaddleOCR-VL-1.5</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

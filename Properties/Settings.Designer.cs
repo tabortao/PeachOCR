@@ -118,5 +118,53 @@ namespace PeachOCR.Properties {
                 this["AIOutputFileFormat"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PaddleOCR（在线）")]
+        public string OCRServiceProvider {
+            get {
+                return ((string)(this["OCRServiceProvider"]));
+            }
+            set {
+                this["OCRServiceProvider"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://paddleocr.aistudio-app.com/api/v2/ocr/jobs")]
+        public string OCRApiUrl {
+            get {
+                return ((string)(this["OCRApiUrl"]));
+            }
+            set {
+                this["OCRApiUrl"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OCRApiKey {
+            get {
+                return ((string)(this["OCRApiKey"]));
+            }
+            set {
+                this["OCRApiKey"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("PaddleOCR-VL-1.5")]
+        public string OCRModel {
+            get {
+                return ((string)(this["OCRModel"]));
+            }
+            set {
+                this["OCRModel"] = value;
+            }
+        }
     }
 }

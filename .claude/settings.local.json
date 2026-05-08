@@ -7,7 +7,10 @@
       "Bash(dotnet run:*)",
       "Bash(taskkill /f /im PeachOCR.exe)",
       "Bash(taskkill /f /pid 1820)",
-      "Bash(dotnet clean:*)"
+      "Bash(dotnet clean:*)",
+      "Bash(dir:*)",
+      "Bash(taskkill /F /IM PeachOCR.exe)",
+      "Bash(taskkill /F /PID 12368)"
     ]
   }
 }

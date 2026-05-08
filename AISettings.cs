@@ -15,6 +15,12 @@ namespace PeachOCR
         private string _translationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
         private string _outputFileFormat = "txt标准格式"; // 输出文件格式：txt标准格式 或 md文件
 
+        // AI OCR 配置
+        private string _ocrServiceProvider = "PaddleOCR（在线）"; // OCR服务提供商
+        private string _ocrApiUrl = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs"; // OCR API地址
+        private string _ocrApiKey = string.Empty; // OCR API密钥
+        private string _ocrModel = "PaddleOCR-VL-1.5"; // OCR模型名称
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -78,6 +84,30 @@ namespace PeachOCR
             set => SetField(ref _outputFileFormat, value);
         }
 
+        public string OcrServiceProvider
+        {
+            get => _ocrServiceProvider;
+            set => SetField(ref _ocrServiceProvider, value);
+        }
+
+        public string OcrApiUrl
+        {
+            get => _ocrApiUrl;
+            set => SetField(ref _ocrApiUrl, value);
+        }
+
+        public string OcrApiKey
+        {
+            get => _ocrApiKey;
+            set => SetField(ref _ocrApiKey, value);
+        }
+
+        public string OcrModel
+        {
+            get => _ocrModel;
+            set => SetField(ref _ocrModel, value);
+        }
+
         public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiUrl) &&
                                    !string.IsNullOrWhiteSpace(ApiKey) &&
                                    !string.IsNullOrWhiteSpace(ModelName);
@@ -92,6 +122,10 @@ namespace PeachOCR
             AnalysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
             TranslationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
             OutputFileFormat = "txt标准格式";
+            OcrServiceProvider = "PaddleOCR（在线）";
+            OcrApiUrl = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
+            OcrApiKey = string.Empty;
+            OcrModel = "PaddleOCR-VL-1.5";
         }
 
         public void ResetToDeepSeekDefaults()
@@ -104,6 +138,10 @@ namespace PeachOCR
             AnalysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
             TranslationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
             OutputFileFormat = "txt标准格式";
+            OcrServiceProvider = "PaddleOCR（在线）";
+            OcrApiUrl = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
+            OcrApiKey = string.Empty;
+            OcrModel = "PaddleOCR-VL-1.5";
         }
     }
 }

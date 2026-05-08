@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using OpenCvSharp;
 using OpenVinoSharp.Extensions.model.PaddleOCR;
+using PeachOCR.OCR;
 
 namespace OCR
 {
@@ -34,6 +35,10 @@ namespace OCR
         // 是否保存/显示结果图片
         private bool saveResultImage = true; // 默认保存
         private string outputFileFormat = "txt标准格式"; // 输出文件格式
+        private string ocrServiceProvider = ""; // OCR服务提供商
+        private string ocrApiUrl = ""; // OCR API地址
+        private string ocrApiKey = ""; // OCR API密钥
+        private string ocrModel = ""; // OCR模型
         private bool showResultImage = false; // 默认不显示
 
         /// <summary>
@@ -108,6 +113,17 @@ namespace OCR
         /// 设置输出文件格式
         /// </summary>
         public void SetOutputFileFormat(string format) => outputFileFormat = format;
+
+        /// <summary>
+        /// 设置OCR服务配置
+        /// </summary>
+        public void SetOcrServiceConfig(string provider, string apiUrl, string apiKey, string model)
+        {
+            ocrServiceProvider = provider;
+            ocrApiUrl = apiUrl;
+            ocrApiKey = apiKey;
+            ocrModel = model;
+        }
         /// <summary>
         /// 设置是否显示结果图片
         /// </summary>
@@ -196,24 +212,92 @@ namespace OCR
                         var ocrPredictor = new OCRPredictor(config);
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
-                        var ocrResult = await Task.Run(() => ocrPredictor.ocr(img, true, true, true));
+                        List<OCRPredictResult>? ocrResult = null;
+                        bool usedOnlineOcr = false;
+                        string processingMethod = "本地OCR";
+
+                        // Check if online OCR should be used (when provider is configured and user selected online model)
+                        if (!string.IsNullOrEmpty(ocrServiceProvider) && !string.IsNullOrEmpty(ocrApiUrl))
+                        {
+                            try
+                            {
+                                using (var onlineOcr = new OnlineOcrService(ocrServiceProvider, ocrApiUrl, ocrApiKey, ocrModel))
+                                {
+                                    var onlineResults = await onlineOcr.ProcessImageAsync(imgPath, outputFileFormat);
+
+                                    // 转换在线OCR结果为本地格式
+                                    ocrResult = new List<OCRPredictResult>();
+                                    foreach (var onlineResult in onlineResults)
+                                    {
+                                        ocrResult.Add(new OCRPredictResult
+                                        {
+                                            text = onlineResult.Text,
+                                            score = (float)onlineResult.Confidence,
+                                            // 添加默认的边界框信息，因为在线OCR可能不提供详细的边界框
+                                            box = new List<List<int>> { new List<int> { 0, 0, 100, 100 } } // 默认边界框
+                                        });
+                                    }
+                                    usedOnlineOcr = true;
+                                    processingMethod = "在线OCR";
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"在线OCR处理失败 {imgPath}: {ex.Message}");
+                                processingMethod = $"在线OCR失败，降级使用本地OCR ({ex.Message})";
+                                // 降级到本地OCR
+                                var localResult = await Task.Run(() => ocrPredictor.ocr(img, true, true, true));
+                                ocrResult = localResult?.ToList();
+                            }
+                        }
+                        else
+                        {
+                            // 使用本地OCR
+                            var localResult = await Task.Run(() => ocrPredictor.ocr(img, true, true, true));
+                            ocrResult = localResult?.ToList();
+                        }
+
+                        // Add processing method to result for UI display
+                        if (ocrResult != null && !usedOnlineOcr && !string.IsNullOrEmpty(ocrServiceProvider))
+                        {
+                            // Convert to List if needed and add a special result item to indicate fallback
+                            if (ocrResult is not List<OCRPredictResult>)
+                            {
+                                ocrResult = ocrResult.ToList();
+                            }
+                            ocrResult.Insert(0, new OCRPredictResult
+                            {
+                                text = $"[处理方式: {processingMethod}]",
+                                score = 1.0f,
+                                box = new List<List<int>> { new List<int> { 0, 0, 100, 100 } } // 默认边界框
+                            });
+                        }
                         sw.Stop();
                         string? resultImgPath = null;
                         Mat? resultImg = null;
-                        if (ocrResult != null)
+                        // 只有本地OCR才进行可视化，在线OCR直接返回文本结果
+                        if (ocrResult != null && ocrResult.Count > 0 && !usedOnlineOcr)
                         {
-                            resultImg = PaddleOcrUtility.visualize_bboxes(img, ocrResult);
-                            string directory = Path.GetDirectoryName(imgPath) ?? string.Empty;
-                            string resultPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(imgPath) + "_result.jpg");
-                            if (saveResultImage)
+                            try
                             {
-                                Cv2.ImWrite(resultPath, resultImg);
-                                resultImgPath = resultPath;
+                                resultImg = PaddleOcrUtility.visualize_bboxes(img, ocrResult);
+                                string directory = Path.GetDirectoryName(imgPath) ?? string.Empty;
+                                string resultPath = Path.Combine(directory, Path.GetFileNameWithoutExtension(imgPath) + "_result.jpg");
+                                if (saveResultImage)
+                                {
+                                    Cv2.ImWrite(resultPath, resultImg);
+                                    resultImgPath = resultPath;
+                                }
+                                if (showResultImage)
+                                {
+                                    lock (lockObj)
+                                        showImgs.Add((imgPath, resultImg));
+                                }
                             }
-                            if (showResultImage)
+                            catch (Exception ex)
                             {
-                                lock (lockObj)
-                                    showImgs.Add((imgPath, resultImg));
+                                Console.WriteLine($"可视化处理失败 {imgPath}: {ex.Message}");
+                                // 可视化失败不影响OCR结果，继续处理
                             }
                         }
                         // 保存识别文本到 OCR_Result 文件夹

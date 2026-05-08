@@ -427,9 +427,11 @@
                 <!-- 选项区域 -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="模型选择：" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox x:Name="ComboModel" Width="140" SelectedIndex="0">
-                        <ComboBoxItem Content="PP-OCRv4"/>
-                        <ComboBoxItem Content="PP-OCRv5"/>
+                    <ComboBox x:Name="ComboModel" Width="200" SelectedIndex="0">
+                        <ComboBoxItem Content="PP-OCRv4(本地)"/>
+                        <ComboBoxItem Content="PP-OCRv5(本地)"/>
+                        <ComboBoxItem Content="PP-OCR-VL-1.5(在线)"/>
+                        <ComboBoxItem Content="硅基-Qwen3-VL(在线)"/>
                     </ComboBox>
                     
                     <CheckBox x:Name="CheckMergeTxt" Content="合并为单个文件" Margin="15,0,0,0"/>
@@ -440,8 +442,8 @@
                 </StackPanel>
                 
                 <!-- 操作按钮 -->
-                <Button x:Name="BtnOcr" Content="开始识别" Grid.Column="1" 
-                        Style="{StaticResource PrimaryButton}" Width="180" Height="42"
+                <Button x:Name="BtnOcr" Content="开始识别" Grid.Column="1"
+                        Style="{StaticResource PrimaryButton}" Width="120" Height="42"
                         FontSize="18" Click="BtnOcr_Click"/>
             </Grid>
         </Border>

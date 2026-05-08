@@ -9,12 +9,14 @@
 
 ### 0.8.2 - 2026-05-08
 
-- feat(AI设置): 添加DeepSeek支持并优化模型选择逻辑，允许用户自定义DeepSeek模型名称，默认使用deepseek-v4-flash
+> 需要安装 .NET 10 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/10.0)
+
+- feat(设置): 添加DeepSeek支持并优化模型选择逻辑，允许用户自定义DeepSeek模型名称，默认使用deepseek-v4-flash
 - feat(设置): 添加输出文件格式选项并支持Markdown格式
 
 ### 0.8.1 - 2026-05-07
 
-> 需要安装 .NET 10 桌面运行时，[点击下载](https://dotnet.microsoft.com/zh-cn/download/dotnet/10.0)
+c
 
 ![PeachOCR-UI](https://github.com/user-attachments/assets/08947dc5-1c1e-407f-a2a6-6d616b496ab0)
 

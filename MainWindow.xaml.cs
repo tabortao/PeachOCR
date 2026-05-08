@@ -33,6 +33,7 @@ namespace PeachOCR
         // 注意：不要声明任何和XAML控件同名的字段，否则会导致自动生成失效
 
         // 双击识别结果区域，打开对应的txt文件
+
         private void ListResultsTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var listImages = this.FindName("ListImages") as ListBox;
@@ -302,11 +303,18 @@ namespace PeachOCR
             }
             allOcrImages.AddRange(imageFiles);
 
-            var processor = new OCR.OcrBatchProcessor();
-            processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OCR.OcrBatchProcessor.ModelType.PP_OCRv4 : OCR.OcrBatchProcessor.ModelType.PP_OCRv5);
+            var processor = new OcrBatchProcessor();
+            processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
             processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
             processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
             processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
+
+            // 设置在线OCR服务配置（当选择在线模型时）
+            if (comboModel != null && comboModel.SelectedIndex >= 2 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+            {
+                processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
+            }
+
             processor.AddImages(allOcrImages);
             int total = allOcrImages.Count;
             var task = Task.Run(async () =>
@@ -481,7 +489,11 @@ namespace PeachOCR
                 OcrEnhancementPrompt = Properties.Settings.Default.AIOcrEnhancementPrompt,
                 AnalysisPrompt = Properties.Settings.Default.AIAnalysisPrompt,
                 TranslationPrompt = Properties.Settings.Default.AITranslationPrompt,
-                OutputFileFormat = Properties.Settings.Default.AIOutputFileFormat
+                OutputFileFormat = Properties.Settings.Default.AIOutputFileFormat,
+                OcrServiceProvider = Properties.Settings.Default.OCRServiceProvider,
+                OcrApiUrl = Properties.Settings.Default.OCRApiUrl,
+                OcrApiKey = Properties.Settings.Default.OCRApiKey,
+                OcrModel = Properties.Settings.Default.OCRModel
             }!;
         }
 
@@ -497,6 +509,10 @@ namespace PeachOCR
             Properties.Settings.Default.AIAnalysisPrompt = _aiSettings.AnalysisPrompt;
             Properties.Settings.Default.AITranslationPrompt = _aiSettings.TranslationPrompt;
             Properties.Settings.Default.AIOutputFileFormat = _aiSettings.OutputFileFormat;
+            Properties.Settings.Default.OCRServiceProvider = _aiSettings.OcrServiceProvider;
+            Properties.Settings.Default.OCRApiUrl = _aiSettings.OcrApiUrl;
+            Properties.Settings.Default.OCRApiKey = _aiSettings.OcrApiKey;
+            Properties.Settings.Default.OCRModel = _aiSettings.OcrModel;
             Properties.Settings.Default.Save();
         }
 
@@ -627,16 +643,43 @@ namespace PeachOCR
                         var lines = new List<string>(enhancedText?.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None) ?? Array.Empty<string>());
                         fileResultMap[fileName] = lines;
 
-                        // 保存到对应的txt文件
+                        // 保存到对应文件（根据输出格式设置）
                         string? originalFilePath = selectedImages.FirstOrDefault(f => System.IO.Path.GetFileName(f) == fileName);
                         if (!string.IsNullOrEmpty(originalFilePath))
                         {
                             string srcDir = System.IO.Path.GetDirectoryName(originalFilePath) ?? string.Empty;
                             string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
-                            string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(originalFilePath) + ".txt");
-
                             System.IO.Directory.CreateDirectory(resultDir);
-                            System.IO.File.WriteAllLines(txtPath, lines);
+
+                            // 确定文件扩展名基于当前输出格式设置
+                            string extension = _aiSettings?.OutputFileFormat == "md文件" ? ".md" : ".txt";
+
+                            if (extension == ".md")
+                            {
+                                // 保存为Markdown格式
+                                string mdPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(originalFilePath) + ".md");
+                                using (var writer = new System.IO.StreamWriter(mdPath, false))
+                                {
+                                    writer.WriteLine($"# {System.IO.Path.GetFileNameWithoutExtension(originalFilePath)}");
+                                    writer.WriteLine();
+                                    writer.WriteLine("## OCR 识别结果（AI增强）");
+                                    writer.WriteLine();
+                                    foreach (var line in lines)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(line))
+                                        {
+                                            writer.WriteLine(line);
+                                            writer.WriteLine();
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // 保存为TXT格式
+                                string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(originalFilePath) + ".txt");
+                                System.IO.File.WriteAllLines(txtPath, lines);
+                            }
                         }
                     }
 
