@@ -10,7 +10,7 @@ namespace PeachOCR
         private string _apiUrl = "https://api.openai.com/v1";
         private string _apiKey = string.Empty;
         private string _modelName = "gpt-3.5-turbo";
-        private string _ocrEnhancementPrompt = "请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：";
+        private string _ocrEnhancementPrompt = "请对以下OCR识别结果进行文本增强优化，要求：\n1. 保持原文语言不变（中文保持中文，英文保持英文，不进行翻译）\n2. 纠正错别字、OCR识别错误和明显的拼写错误\n3. 优化文本排版：规范标点符号使用，修正空格和换行\n4. 根据语义进行合理的段落划分：按内容逻辑分段，保持段落连贯性\n5. 保持原文意思和专业术语不变\n6. 只返回优化后的文本内容，不要添加任何解释或说明\n\nOCR识别结果：";
         private string _analysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
         private string _translationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
         private string _outputFileFormat = "txt标准格式"; // 输出文件格式：txt标准格式 或 md文件
@@ -118,7 +118,7 @@ namespace PeachOCR
             ApiUrl = "https://api.openai.com/v1";
             ApiKey = string.Empty;
             ModelName = "gpt-3.5-turbo";
-            OcrEnhancementPrompt = "请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：";
+            OcrEnhancementPrompt = "请对以下OCR识别结果进行文本增强优化，要求：\n1. 保持原文语言不变（中文保持中文，英文保持英文，不进行翻译）\n2. 纠正错别字、OCR识别错误和明显的拼写错误\n3. 优化文本排版：规范标点符号使用，修正空格和换行\n4. 根据语义进行合理的段落划分：按内容逻辑分段，保持段落连贯性\n5. 保持原文意思和专业术语不变\n6. 只返回优化后的文本内容，不要添加任何解释或说明\n\nOCR识别结果：";
             AnalysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
             TranslationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
             OutputFileFormat = "txt标准格式";
@@ -134,7 +134,7 @@ namespace PeachOCR
             ApiUrl = "https://api.deepseek.com";
             ApiKey = string.Empty;
             ModelName = "deepseek-v4-flash"; // Default DeepSeek model
-            OcrEnhancementPrompt = "请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：";
+            OcrEnhancementPrompt = "请对以下OCR识别结果进行文本增强优化，要求：\n1. 保持原文语言不变（中文保持中文，英文保持英文，不进行翻译）\n2. 纠正错别字、OCR识别错误和明显的拼写错误\n3. 优化文本排版：规范标点符号使用，修正空格和换行\n4. 根据语义进行合理的段落划分：按内容逻辑分段，保持段落连贯性\n5. 保持原文意思和专业术语不变\n6. 只返回优化后的文本内容，不要添加任何解释或说明\n\nOCR识别结果：";
             AnalysisPrompt = "请对以下文本进行分析和总结：\n1. 提取关键信息\n2. 总结主要内容\n3. 识别重要数据或要点\n4. 以清晰的结构呈现\n\n需要分析的文本：";
             TranslationPrompt = "请将以下文本翻译成中文：\n1. 保持专业术语的准确性\n2. 确保翻译的流畅性和可读性\n3. 保持原文的格式和结构\n\n需要翻译的文本：";
             OutputFileFormat = "txt标准格式";

@@ -73,7 +73,7 @@ namespace PeachOCR.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式，按Markdown格式组织\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：")]
+        [global::System.Configuration.DefaultSettingValueAttribute("请对以下OCR识别结果进行文本增强优化，要求：\n1. 保持原文语言不变（中文保持中文，英文保持英文，不进行翻译）\n2. 纠正错别字、OCR识别错误和明显的拼写错误\n3. 优化文本排版：规范标点符号使用，修正空格和换行\n4. 根据语义进行合理的段落划分：按内容逻辑分段，保持段落连贯性\n5. 保持原文意思和专业术语不变\n6. 只返回优化后的文本内容，不要添加任何解释或说明\n\nOCR识别结果：")]
         public string AIOcrEnhancementPrompt {
             get {
                 return ((string)(this["AIOcrEnhancementPrompt"]));
