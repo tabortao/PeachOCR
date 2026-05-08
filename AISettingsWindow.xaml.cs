@@ -38,6 +38,16 @@ namespace PeachOCR
             TxtAnalysisPrompt.Text = _settings.AnalysisPrompt;
             TxtTranslationPrompt.Text = _settings.TranslationPrompt;
 
+            // Load output format setting
+            if (_settings.OutputFileFormat == "md文件")
+            {
+                ComboOutputFormat.SelectedIndex = 1;
+            }
+            else
+            {
+                ComboOutputFormat.SelectedIndex = 0; // txt标准格式
+            }
+
             // Clear connection status
             TxtConnectionStatus.Text = string.Empty;
             TxtConnectionStatus.Foreground = System.Windows.Media.Brushes.Gray;
@@ -66,6 +76,16 @@ namespace PeachOCR
             _settings.OcrEnhancementPrompt = TxtOcrEnhancementPrompt.Text;
             _settings.AnalysisPrompt = TxtAnalysisPrompt.Text;
             _settings.TranslationPrompt = TxtTranslationPrompt.Text;
+
+            // Save output format setting
+            if (ComboOutputFormat.SelectedIndex == 1)
+            {
+                _settings.OutputFileFormat = "md文件";
+            }
+            else
+            {
+                _settings.OutputFileFormat = "txt标准格式";
+            }
 
             _isModified = true;
         }

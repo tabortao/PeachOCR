@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PeachOCR"
         mc:Ignorable="d"
-        Title="AI设置" Height="600" Width="800" MinWidth="750" MinHeight="550"
+        Title="设置" Height="600" Width="800" MinWidth="750" MinHeight="550"
         Background="#1E1E1E" WindowStartupLocation="CenterOwner"
         WindowStyle="ToolWindow">
 
@@ -166,7 +166,7 @@
         </Grid.RowDefinitions>
 
         <!-- 标题 -->
-        <TextBlock Grid.Row="0" Text="AI设置"
+        <TextBlock Grid.Row="0" Text="设置"
                    FontSize="20" FontWeight="Bold"
                    Foreground="#2196f3"
                    HorizontalAlignment="Center"
@@ -199,6 +199,21 @@
                                     Style="{StaticResource PrimaryButton}" Click="BtnTestConnection_Click"/>
                             <TextBlock x:Name="TxtConnectionStatus" Margin="10,0,0,0" VerticalAlignment="Center"/>
                         </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 保存文件类型配置 -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="保存文件类型配置" Style="{StaticResource SectionTitle}"/>
+
+                        <Label Content="输出文件格式："/>
+                        <ComboBox x:Name="ComboOutputFormat" SelectedIndex="0">
+                            <ComboBoxItem Content="txt标准格式"/>
+                            <ComboBoxItem Content="md文件"/>
+                        </ComboBox>
+                        <TextBlock Text="选择md文件后，输出的文件将是Markdown格式，双击识别结果区域可使用默认Markdown软件打开"
+                                   FontSize="12" Foreground="#A0A0A0" Margin="0,5,0,10" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
 

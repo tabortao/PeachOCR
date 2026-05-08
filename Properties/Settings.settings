@@ -42,5 +42,8 @@ OCR识别结果：</Value>
 
 需要翻译的文本：</Value>
     </Setting>
+    <Setting Name="AIOutputFileFormat" Type="System.String" Scope="User">
+      <Value Profile="(Default)">txt标准格式</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

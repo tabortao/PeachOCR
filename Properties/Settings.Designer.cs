@@ -73,7 +73,7 @@ namespace PeachOCR.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：")]
+        [global::System.Configuration.DefaultSettingValueAttribute("请对以下OCR识别结果进行优化：\n1. 纠正错别字和识别错误\n2. 优化文本排版和格式，按Markdown格式组织\n3. 根据语义进行合理的段落划分\n4. 保持原文意思不变\n\nOCR识别结果：")]
         public string AIOcrEnhancementPrompt {
             get {
                 return ((string)(this["AIOcrEnhancementPrompt"]));
@@ -104,6 +104,18 @@ namespace PeachOCR.Properties {
             }
             set {
                 this["AITranslationPrompt"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("txt标准格式")]
+        public string AIOutputFileFormat {
+            get {
+                return ((string)(this["AIOutputFileFormat"]));
+            }
+            set {
+                this["AIOutputFileFormat"] = value;
             }
         }
     }

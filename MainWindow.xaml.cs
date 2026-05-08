@@ -39,31 +39,34 @@ namespace PeachOCR
             if (listImages?.SelectedIndex is int idx && idx >= 0 && idx < selectedImages.Count)
             {
                 string filePath = selectedImages[idx];
-                string txtPath = string.Empty;
                 if (System.IO.File.Exists(filePath))
                 {
                     string srcDir = System.IO.Path.GetDirectoryName(filePath) ?? string.Empty;
                     string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
                     string name = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                    txtPath = System.IO.Path.Combine(resultDir, name + ".txt");
-                    if (System.IO.File.Exists(txtPath))
+
+                    // Determine file extension based on output format setting
+                    string extension = _aiSettings?.OutputFileFormat == "md文件" ? ".md" : ".txt";
+                    string resultPath = System.IO.Path.Combine(resultDir, name + extension);
+
+                    if (System.IO.File.Exists(resultPath))
                     {
                         try
                         {
                             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
                             {
-                                FileName = txtPath,
+                                FileName = resultPath,
                                 UseShellExecute = true
                             });
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show($"无法打开文件：{txtPath}\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show($"无法打开文件：{resultPath}\n{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
                     }
                     else
                     {
-                        MessageBox.Show($"未找到对应的txt文件：{txtPath}", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"未找到对应的{extension}文件：{resultPath}", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
             }
@@ -303,6 +306,7 @@ namespace PeachOCR
             processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OCR.OcrBatchProcessor.ModelType.PP_OCRv4 : OCR.OcrBatchProcessor.ModelType.PP_OCRv5);
             processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
             processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
+            processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
             processor.AddImages(allOcrImages);
             int total = allOcrImages.Count;
             var task = Task.Run(async () =>
@@ -476,7 +480,8 @@ namespace PeachOCR
                 ModelName = Properties.Settings.Default.AIModelName,
                 OcrEnhancementPrompt = Properties.Settings.Default.AIOcrEnhancementPrompt,
                 AnalysisPrompt = Properties.Settings.Default.AIAnalysisPrompt,
-                TranslationPrompt = Properties.Settings.Default.AITranslationPrompt
+                TranslationPrompt = Properties.Settings.Default.AITranslationPrompt,
+                OutputFileFormat = Properties.Settings.Default.AIOutputFileFormat
             }!;
         }
 
@@ -491,6 +496,7 @@ namespace PeachOCR
             Properties.Settings.Default.AIOcrEnhancementPrompt = _aiSettings.OcrEnhancementPrompt;
             Properties.Settings.Default.AIAnalysisPrompt = _aiSettings.AnalysisPrompt;
             Properties.Settings.Default.AITranslationPrompt = _aiSettings.TranslationPrompt;
+            Properties.Settings.Default.AIOutputFileFormat = _aiSettings.OutputFileFormat;
             Properties.Settings.Default.Save();
         }
 

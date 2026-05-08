@@ -33,6 +33,7 @@ namespace OCR
         private OCRPredictor? ocr;
         // 是否保存/显示结果图片
         private bool saveResultImage = true; // 默认保存
+        private string outputFileFormat = "txt标准格式"; // 输出文件格式
         private bool showResultImage = false; // 默认不显示
 
         /// <summary>
@@ -102,6 +103,11 @@ namespace OCR
         /// 设置是否保存结果图片
         /// </summary>
         public void SetSaveResultImage(bool save) => saveResultImage = save;
+
+        /// <summary>
+        /// 设置输出文件格式
+        /// </summary>
+        public void SetOutputFileFormat(string format) => outputFileFormat = format;
         /// <summary>
         /// 设置是否显示结果图片
         /// </summary>
@@ -216,12 +222,37 @@ namespace OCR
                             string directory = Path.GetDirectoryName(imgPath) ?? string.Empty;
                             string ocrResultDir = Path.Combine(directory, "OCR_Result");
                             Directory.CreateDirectory(ocrResultDir);
-                            string txtPath = Path.Combine(ocrResultDir, Path.GetFileNameWithoutExtension(imgPath) + ".txt");
-                            using (var writer = new StreamWriter(txtPath, false))
+
+                            if (outputFileFormat == "md文件")
                             {
-                                foreach (var item in ocrResult)
+                                // Save as Markdown format
+                                string mdPath = Path.Combine(ocrResultDir, Path.GetFileNameWithoutExtension(imgPath) + ".md");
+                                using (var writer = new StreamWriter(mdPath, false))
                                 {
-                                    writer.WriteLine(item.text);
+                                    writer.WriteLine($"# {Path.GetFileNameWithoutExtension(imgPath)}");
+                                    writer.WriteLine();
+                                    writer.WriteLine("## OCR 识别结果");
+                                    writer.WriteLine();
+                                    foreach (var item in ocrResult)
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(item.text))
+                                        {
+                                            writer.WriteLine(item.text);
+                                            writer.WriteLine();
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // Save as standard TXT format
+                                string txtPath = Path.Combine(ocrResultDir, Path.GetFileNameWithoutExtension(imgPath) + ".txt");
+                                using (var writer = new StreamWriter(txtPath, false))
+                                {
+                                    foreach (var item in ocrResult)
+                                    {
+                                        writer.WriteLine(item.text);
+                                    }
                                 }
                             }
                         }
