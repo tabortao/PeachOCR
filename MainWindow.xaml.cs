@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +16,7 @@ using Microsoft.Win32;
 using OCR;
 using PDF;
 using Microsoft.Extensions.AI;
+using PracticalToolkit.Screenshot;
 
 namespace PeachOCR
 {
@@ -108,6 +109,220 @@ namespace PeachOCR
         {
             this.Close();
         }
+        private async void BtnScreenshot_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var btnScreenshot = this.FindName("BtnScreenshot") as Button;
+                if (btnScreenshot != null) btnScreenshot.IsEnabled = false;
+
+                using var runner = new ScreenshotRunner();
+                using var bitmap = runner.Screenshot();
+
+                if (bitmap == null)
+                {
+                    if (btnScreenshot != null) btnScreenshot.IsEnabled = true;
+                    return;
+                }
+
+                string tempDir = System.IO.Path.GetTempPath();
+                string fileName = $"screenshot_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                string filePath = System.IO.Path.Combine(tempDir, fileName);
+
+                bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                selectedImages.Add(filePath);
+
+                var listImages = this.FindName("ListImages") as ListBox;
+                if (listImages != null)
+                {
+                    listImages.ItemsSource = null;
+                    listImages.ItemsSource = selectedImages.Select(f => System.IO.Path.GetFileName(f));
+                    listImages.SelectedIndex = selectedImages.Count - 1;
+                }
+
+                var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
+                if (txtFileStatus != null) txtFileStatus.Text = $"已选择 {selectedImages.Count} 个文件";
+
+                var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+                if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
+
+                fileResultMap.Clear();
+                UpdateListImagesHint();
+
+                if (btnScreenshot != null) btnScreenshot.IsEnabled = true;
+
+                await PerformOcrAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"截图失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                var btnScreenshot = this.FindName("BtnScreenshot") as Button;
+                if (btnScreenshot != null) btnScreenshot.IsEnabled = true;
+            }
+        }
+
+        private async Task PerformOcrAsync()
+        {
+            var comboModel = this.FindName("ComboModel") as ComboBox;
+            var checkGpu = this.FindName("CheckGpu") as CheckBox;
+            var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
+            var progressOcr = this.FindName("ProgressOcr") as ProgressBar;
+            var listImages = this.FindName("ListImages") as ListBox;
+            var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
+            var btnOcr = this.FindName("BtnOcr") as Button;
+            var statusBarText = this.FindName("StatusBarText") as TextBlock;
+            var btnScreenshot = this.FindName("BtnScreenshot") as Button;
+
+            if (btnOcr != null) btnOcr.IsEnabled = false;
+            if (btnScreenshot != null) btnScreenshot.IsEnabled = false;
+            if (progressOcr != null) progressOcr.Value = 0;
+            if (listResultsTextBox != null) listResultsTextBox.Text = string.Empty;
+            fileResultMap.Clear();
+            if (statusBarText != null) statusBarText.Text = "正在识别...";
+
+            var ocrWatch = System.Diagnostics.Stopwatch.StartNew();
+
+            var pdfExts = new[] { ".pdf" };
+            var pdfFiles = selectedImages.Where(f => pdfExts.Contains(System.IO.Path.GetExtension(f).ToLower())).ToList();
+            var imageFiles = selectedImages.Where(f => !pdfExts.Contains(System.IO.Path.GetExtension(f).ToLower())).ToList();
+            var allOcrImages = new List<string>();
+            var pdfToTxtMap = new Dictionary<string, List<string>>();
+
+            if (pdfFiles.Count > 0)
+            {
+                foreach (var pdf in pdfFiles)
+                {
+                    string pdfDir = System.IO.Path.GetDirectoryName(pdf) ?? "";
+                    string pdfName = System.IO.Path.GetFileNameWithoutExtension(pdf);
+                    string outDir = System.IO.Path.Combine(pdfDir, pdfName);
+                    string imageFormat = "jpg";
+                    int dpi = 250;
+                    int jpegQuality = 90;
+                    var pdfToImageTask = PDF.Convert.PDFToImagesAsync(new[] { pdf }, outDir, dpi, imageFormat, jpegQuality);
+                    await pdfToImageTask;
+                    List<string> imgs = new List<string>();
+                    if (System.IO.Directory.Exists(outDir))
+                    {
+                        imgs = System.IO.Directory.GetFiles(outDir, $"*_page_*.{imageFormat}").OrderBy(f => f).ToList();
+                    }
+                    allOcrImages.AddRange(imgs);
+                    pdfToTxtMap[pdf] = imgs;
+                }
+            }
+            allOcrImages.AddRange(imageFiles);
+
+            var processor = new OcrBatchProcessor();
+            processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+            processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
+            processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
+            processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
+
+            if (comboModel != null && comboModel.SelectedIndex >= 2 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+            {
+                processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
+            }
+
+            processor.AddImages(allOcrImages);
+            int total = allOcrImages.Count;
+            var task = Task.Run(async () =>
+            {
+                var result = await processor.RunBatchOcrAsync(2, (done, all) =>
+                {
+                    if (progressOcr != null)
+                        Dispatcher.Invoke(() =>
+                        {
+                            progressOcr.Value = all > 0 ? done * 100.0 / all : 0;
+                        });
+                });
+                return result;
+            });
+            var result = await task;
+
+            var imgToText = new Dictionary<string, List<string>>();
+            foreach (var detail in result.details)
+            {
+                string fileName = System.IO.Path.GetFileName(detail.ImgPath);
+                List<string> lines = new();
+                if (detail.Result == null)
+                {
+                    lines.Add("识别失败");
+                }
+                else
+                {
+                    foreach (var r in detail.Result)
+                    {
+                        lines.Add(r.text);
+                    }
+                }
+                imgToText[detail.ImgPath] = lines;
+            }
+
+            var txtPaths = new List<string>();
+            var createdResultDirs = new HashSet<string>();
+
+            foreach (var kv in pdfToTxtMap)
+            {
+                string pdfPath = kv.Key;
+                var imgs = kv.Value;
+                var allLines = new List<string>();
+                foreach (var img in imgs)
+                {
+                    if (imgToText.TryGetValue(img, out var lines))
+                        allLines.AddRange(lines);
+                }
+                string srcDir = System.IO.Path.GetDirectoryName(pdfPath) ?? "";
+                string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                if (!createdResultDirs.Contains(resultDir))
+                {
+                    System.IO.Directory.CreateDirectory(resultDir);
+                    createdResultDirs.Add(resultDir);
+                }
+                string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(pdfPath) + ".txt");
+                System.IO.File.WriteAllLines(txtPath, allLines);
+                fileResultMap[System.IO.Path.GetFileName(pdfPath)] = allLines;
+                txtPaths.Add(txtPath);
+            }
+
+            foreach (var img in imageFiles)
+            {
+                if (imgToText.TryGetValue(img, out var lines))
+                {
+                    string srcDir = System.IO.Path.GetDirectoryName(img) ?? "";
+                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                    if (!createdResultDirs.Contains(resultDir))
+                    {
+                        System.IO.Directory.CreateDirectory(resultDir);
+                        createdResultDirs.Add(resultDir);
+                    }
+                    string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(img) + ".txt");
+                    System.IO.File.WriteAllLines(txtPath, lines);
+                    fileResultMap[System.IO.Path.GetFileName(img)] = lines;
+                    txtPaths.Add(txtPath);
+                }
+            }
+
+            if (progressOcr != null) progressOcr.Value = 100;
+            ocrWatch.Stop();
+            double seconds = ocrWatch.Elapsed.TotalSeconds;
+
+            if (selectedImages.Count > 0 && listImages != null)
+            {
+                listImages.SelectedIndex = selectedImages.Count - 1;
+                var lastFile = System.IO.Path.GetFileName(selectedImages[selectedImages.Count - 1]);
+                if (fileResultMap.ContainsKey(lastFile) && listResultsTextBox != null)
+                    listResultsTextBox.Text = string.Join(Environment.NewLine, fileResultMap[lastFile]);
+            }
+
+            if (btnOcr != null) btnOcr.IsEnabled = true;
+            if (btnScreenshot != null) btnScreenshot.IsEnabled = true;
+            if (statusBarText != null)
+            {
+                string txtInfo = txtPaths.Count == 1 ? txtPaths[0] : string.Join("; ", txtPaths);
+                statusBarText.Text = $"识别完成，耗时{seconds:F1}秒，结果txt路径：{txtInfo}";
+            }
+        }
+
         private void BtnSelectImages_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new Microsoft.Win32.OpenFileDialog

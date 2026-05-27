@@ -1,4 +1,4 @@
-﻿<Window x:Class="PeachOCR.MainWindow"
+<Window x:Class="PeachOCR.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -276,6 +276,8 @@
                 
                 <!-- 操作区域 -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button x:Name="BtnScreenshot" Content="截图" 
+                            Style="{StaticResource SecondaryButton}" Width="100" Click="BtnScreenshot_Click"/>
                     <Button x:Name="BtnSelectImages" Content="选择图片或PDF" 
                             Style="{StaticResource PrimaryButton}" Width="180" Click="BtnSelectImages_Click"/>
                     

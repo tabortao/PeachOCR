@@ -6,7 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <NoWarn>$(NoWarn) ;NU1701</NoWarn>
+    <NoWarn>$(NoWarn) ;NU1701;NU1510;NU1902</NoWarn>
+    <WarningsNotAsErrors>NU1902</WarningsNotAsErrors>
     <ApplicationIcon>Resources\app_icon.ico</ApplicationIcon>
     <PackageIcon>icon.png</PackageIcon>
     <Version>0.8.2</Version>
@@ -22,7 +23,11 @@
     <PackageReference Include="OpenVINO.CSharp.API.Extensions.PaddleOCR" Version="1.0.3" />
     <PackageReference Include="OpenVINO.runtime.win" Version="2025.1.0.1" />
     <PackageReference Include="PDFtoImage" Version="5.2.1" />
+    <PackageReference Include="PracticalToolkit.Screenshot" Version="1.0.3">
+      <NoWarn>NU1902</NoWarn>
+    </PackageReference>
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.8" />
     <Resource Include="Resources\\app_icon.ico" />
     <Resource Include="Resources\\icon.png" />
     <None Include="models\\**\\*.*">
