@@ -57,5 +57,8 @@ OCR识别结果：</Value>
     <Setting Name="OCRModel" Type="System.String" Scope="User">
       <Value Profile="(Default)">PaddleOCR-VL-1.5</Value>
     </Setting>
+    <Setting Name="ScreenshotHotkey" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
   </Settings>
 </SettingsFile>

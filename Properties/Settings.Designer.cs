@@ -166,5 +166,17 @@ namespace PeachOCR.Properties {
                 this["OCRModel"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ScreenshotHotkey {
+            get {
+                return ((string)(this["ScreenshotHotkey"]));
+            }
+            set {
+                this["ScreenshotHotkey"] = value;
+            }
+        }
     }
 }

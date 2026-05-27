@@ -10,7 +10,6 @@
         WindowStyle="ToolWindow">
 
     <Window.Resources>
-        <!-- 复用MainWindow的样式 -->
         <Style TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI, Microsoft YaHei, Arial"/>
             <Setter Property="Foreground" Value="#E0E0E0"/>
@@ -165,7 +164,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 标题 -->
         <TextBlock Grid.Row="0" Text="设置"
                    FontSize="20" FontWeight="Bold"
                    Foreground="#2196f3"
@@ -174,7 +172,6 @@
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
-                <!-- 服务提供商配置 -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
                         <TextBlock Text="服务提供商配置" Style="{StaticResource SectionTitle}"/>
@@ -191,7 +188,7 @@
                         <Label Content="API密钥："/>
                         <StackPanel Orientation="Horizontal">
                             <PasswordBox x:Name="PwdApiKey" Width="600"/>
-                            <Button x:Name="BtnToggleApiKey" Content="👁" Width="30" Height="28" Margin="5,5,0,10" 
+                            <Button x:Name="BtnToggleApiKey" Content="👁" Width="30" Height="28" Margin="5,5,0,10"
                                     Style="{StaticResource SecondaryButton}" Click="BtnToggleApiKey_Click"
                                     ToolTip="显示/隐藏密码"/>
                         </StackPanel>
@@ -207,15 +204,13 @@
                     </StackPanel>
                 </Border>
 
-                <!-- AI OCR配置 -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
                         <TextBlock Text="AI OCR配置" Style="{StaticResource SectionTitle}"/>
 
                         <Label Content="OCR服务提供商："/>
-                        <ComboBox x:Name="ComboOcrServiceProvider" SelectedIndex="0" SelectionChanged="ComboOcrServiceProvider_SelectionChanged">
+                        <ComboBox x:Name="ComboOcrServiceProvider" SelectedIndex="0" IsEnabled="False">
                             <ComboBoxItem Content="PaddleOCR（在线）"/>
-                            <ComboBoxItem Content="硅基流动"/>
                         </ComboBox>
 
                         <Label Content="OCR API地址："/>
@@ -224,7 +219,7 @@
                         <Label Content="API密钥："/>
                         <StackPanel Orientation="Horizontal">
                             <PasswordBox x:Name="PwdOcrApiKey" Width="600" ToolTip="OCR服务商的TOKEN或API密钥"/>
-                            <Button x:Name="BtnToggleOcrApiKey" Content="👁" Width="30" Height="28" Margin="5,5,0,10" 
+                            <Button x:Name="BtnToggleOcrApiKey" Content="👁" Width="30" Height="28" Margin="5,5,0,10"
                                     Style="{StaticResource SecondaryButton}" Click="BtnToggleOcrApiKey_Click"
                                     ToolTip="显示/隐藏密码"/>
                         </StackPanel>
@@ -232,7 +227,7 @@
                         <Label Content="OCR模型："/>
                         <TextBox x:Name="TxtOcrModel" ToolTip="OCR服务商支持的模型名称"/>
 
-                        <TextBlock Text="推荐配置：\n• PaddleOCR（在线）：默认模型 PaddleOCR-VL-1.5\n• 硅基流动：推荐 Qwen/Qwen3-VL-235B-A22B-Instruct 或 PaddlePaddle/PaddleOCR-VL-1.5"
+                        <TextBlock Text="推荐配置：\n• PaddleOCR（在线）：默认模型 PaddleOCR-VL-1.5"
                                    FontSize="12" Foreground="#A0A0A0" Margin="0,5,0,10" TextWrapping="Wrap"/>
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -243,7 +238,24 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 保存文件类型配置 -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="快捷键配置" Style="{StaticResource SectionTitle}"/>
+
+                        <Label Content="截图OCR快捷键："/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="TxtScreenshotHotkey" Width="200" IsReadOnly="True"
+                                     ToolTip="按下此组合键将直接进行截图OCR"/>
+                            <Button x:Name="BtnCaptureHotkey" Content="点击设置" Width="100" Height="32" Margin="10,5,0,10"
+                                    Style="{StaticResource SecondaryButton}" Click="BtnCaptureHotkey_Click"/>
+                            <Button x:Name="BtnClearHotkey" Content="清除" Width="60" Height="32" Margin="5,5,0,10"
+                                    Style="{StaticResource SecondaryButton}" Click="BtnClearHotkey_Click"/>
+                        </StackPanel>
+                        <TextBlock Text='提示：按下您想要的快捷键组合（如 Ctrl+Shift+Q），然后点击"点击设置"'
+                                   FontSize="12" Foreground="#A0A0A0" Margin="0,5,0,10" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
                         <TextBlock Text="保存文件类型配置" Style="{StaticResource SectionTitle}"/>
@@ -258,7 +270,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- AI提示词配置 -->
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
                         <TextBlock Text="AI提示词配置" Style="{StaticResource SectionTitle}"/>
@@ -279,7 +290,6 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- 按钮区域 -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
             <Button x:Name="BtnSave" Content="保存" Style="{StaticResource PrimaryButton}" Width="100" Click="BtnSave_Click"/>
             <Button x:Name="BtnCancel" Content="取消" Style="{StaticResource SecondaryButton}" Width="100" Click="BtnCancel_Click"/>

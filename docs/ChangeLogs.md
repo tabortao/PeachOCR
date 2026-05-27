@@ -7,6 +7,11 @@
 
 ### 0.8.3 - 2026-05-27
 - feat(截图): 新增截图OCR功能
+- feat(截图): 新增区域选择截图功能（使用PracticalToolkit.Screenshot库 https://www.nuget.org/packages/PracticalToolkit.Screenshot）
+- feat(快捷键): 添加截图OCR全局快捷键支持，可在设置中自定义快捷键，支持直接按键输入无需弹窗
+- feat(设置): AI OCR配置中移除硅基流动选项，仅保留PaddleOCR（在线）
+- feat(设置): 添加API密钥的显示/隐藏切换功能
+- fix(快捷键): 修复快捷键触发时窗口激活问题，确保窗口正常响应
 - 增加在线API进行OCR（MinerU、PaddleOCR API）的功能 <https://aistudio.baidu.com/paddleocr>
 
 ### 0.8.2 - 2026-05-08

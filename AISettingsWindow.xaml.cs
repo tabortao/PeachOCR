@@ -3,6 +3,8 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace PeachOCR
 {
@@ -11,6 +13,10 @@ namespace PeachOCR
         private AISettings _settings;
         private bool _isModified = false;
         private bool _isInitialized = false;
+        private bool _isCapturingHotkey = false;
+        private string _capturedHotkey = string.Empty;
+        private Key _capturedKey = Key.None;
+        private ModifierKeys _capturedModifiers = ModifierKeys.None;
 
         public AISettingsWindow(AISettings settings)
         {
@@ -18,18 +24,67 @@ namespace PeachOCR
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             LoadSettings();
             _isInitialized = true;
+
+            PreviewKeyDown += AISettingsWindow_PreviewKeyDown;
+        }
+
+        private void AISettingsWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (!_isCapturingHotkey) return;
+
+            e.Handled = true;
+
+            _capturedKey = e.Key == Key.System ? e.SystemKey : e.Key;
+            _capturedModifiers = Keyboard.Modifiers;
+
+            if (_capturedKey == Key.LeftCtrl || _capturedKey == Key.RightCtrl ||
+                _capturedKey == Key.LeftAlt || _capturedKey == Key.RightAlt ||
+                _capturedKey == Key.LeftShift || _capturedKey == Key.RightShift ||
+                _capturedKey == Key.LWin || _capturedKey == Key.RWin)
+            {
+                return;
+            }
+
+            _capturedHotkey = BuildHotkeyString(_capturedModifiers, _capturedKey);
+            TxtScreenshotHotkey.Text = _capturedHotkey;
+
+            _isCapturingHotkey = false;
+            BtnCaptureHotkey.Content = "点击设置";
+        }
+
+        private string BuildHotkeyString(ModifierKeys modifiers, Key key)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+
+            if ((modifiers & ModifierKeys.Control) != 0)
+                parts.Add("Ctrl");
+            if ((modifiers & ModifierKeys.Alt) != 0)
+                parts.Add("Alt");
+            if ((modifiers & ModifierKeys.Shift) != 0)
+                parts.Add("Shift");
+            if ((modifiers & ModifierKeys.Windows) != 0)
+                parts.Add("Win");
+
+            string keyString = key.ToString();
+            if (keyString.StartsWith("D") && keyString.Length == 2)
+            {
+                keyString = keyString.Substring(1);
+            }
+
+            parts.Add(keyString);
+
+            return string.Join("+", parts);
         }
 
         private void LoadSettings()
         {
-            // Load current settings into UI
             if (_settings.ServiceProvider == "DeepSeek")
             {
                 ComboServiceProvider.SelectedIndex = 1;
             }
             else
             {
-                ComboServiceProvider.SelectedIndex = 0; // OpenAI compatible
+                ComboServiceProvider.SelectedIndex = 0;
             }
             TxtApiUrl.Text = _settings.ApiUrl;
             PwdApiKey.Password = _settings.ApiKey;
@@ -38,30 +93,22 @@ namespace PeachOCR
             TxtAnalysisPrompt.Text = _settings.AnalysisPrompt;
             TxtTranslationPrompt.Text = _settings.TranslationPrompt;
 
-            // Load output format setting
             if (_settings.OutputFileFormat == "md文件")
             {
                 ComboOutputFormat.SelectedIndex = 1;
             }
             else
             {
-                ComboOutputFormat.SelectedIndex = 0; // txt标准格式
+                ComboOutputFormat.SelectedIndex = 0;
             }
 
-            // Load OCR settings
-            if (_settings.OcrServiceProvider == "硅基流动")
-            {
-                ComboOcrServiceProvider.SelectedIndex = 1;
-            }
-            else
-            {
-                ComboOcrServiceProvider.SelectedIndex = 0; // PaddleOCR（在线）
-            }
+            ComboOcrServiceProvider.SelectedIndex = 0;
             TxtOcrApiUrl.Text = _settings.OcrApiUrl;
             PwdOcrApiKey.Password = _settings.OcrApiKey;
             TxtOcrModel.Text = _settings.OcrModel;
 
-            // Clear connection status
+            TxtScreenshotHotkey.Text = _settings.ScreenshotHotkey;
+
             TxtConnectionStatus.Text = string.Empty;
             TxtConnectionStatus.Foreground = System.Windows.Media.Brushes.Gray;
             TxtOcrConnectionStatus.Text = string.Empty;
@@ -74,7 +121,6 @@ namespace PeachOCR
             {
                 _settings.ServiceProvider = "DeepSeek";
                 _settings.ApiUrl = "https://api.deepseek.com";
-                // Allow custom model name for DeepSeek, use deepseek-v4-flash as default if empty
                 string modelName = TxtModelName.Text.Trim();
                 _settings.ModelName = string.IsNullOrWhiteSpace(modelName) ? "deepseek-v4-flash" : modelName;
                 TxtApiUrl.Text = _settings.ApiUrl;
@@ -92,7 +138,6 @@ namespace PeachOCR
             _settings.AnalysisPrompt = TxtAnalysisPrompt.Text;
             _settings.TranslationPrompt = TxtTranslationPrompt.Text;
 
-            // Save output format setting
             if (ComboOutputFormat.SelectedIndex == 1)
             {
                 _settings.OutputFileFormat = "md文件";
@@ -102,18 +147,12 @@ namespace PeachOCR
                 _settings.OutputFileFormat = "txt标准格式";
             }
 
-            // Save OCR settings
-            if (ComboOcrServiceProvider.SelectedIndex == 1)
-            {
-                _settings.OcrServiceProvider = "硅基流动";
-            }
-            else
-            {
-                _settings.OcrServiceProvider = "PaddleOCR（在线）";
-            }
+            _settings.OcrServiceProvider = "PaddleOCR（在线）";
             _settings.OcrApiUrl = TxtOcrApiUrl.Text.Trim();
             _settings.OcrApiKey = GetOcrApiKey();
             _settings.OcrModel = TxtOcrModel.Text.Trim();
+
+            _settings.ScreenshotHotkey = TxtScreenshotHotkey.Text.Trim();
 
             _isModified = true;
         }
@@ -134,7 +173,6 @@ namespace PeachOCR
                 TxtConnectionStatus.Text = "正在测试连接...";
                 TxtConnectionStatus.Foreground = System.Windows.Media.Brushes.Yellow;
 
-                // Create temporary settings for testing
                 var testSettings = new AISettings
                 {
                     ApiUrl = TxtApiUrl.Text.Trim(),
@@ -167,41 +205,22 @@ namespace PeachOCR
 
         private void ComboServiceProvider_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            // Prevent execution during initialization
             if (!_isInitialized || TxtApiUrl == null || TxtModelName == null) return;
 
-            if (ComboServiceProvider.SelectedIndex == 1) // DeepSeek
+            if (ComboServiceProvider.SelectedIndex == 1)
             {
                 TxtApiUrl.Text = "https://api.deepseek.com";
-                // Use deepseek-v4-flash as default but allow user customization
                 if (string.IsNullOrWhiteSpace(TxtModelName.Text) || TxtModelName.Text == "gpt-3.5-turbo")
                 {
                     TxtModelName.Text = "deepseek-v4-flash";
                 }
                 TxtApiUrl.IsEnabled = false;
-                TxtModelName.IsEnabled = true; // Allow custom model names
+                TxtModelName.IsEnabled = true;
             }
-            else // OpenAI compatible
+            else
             {
                 TxtApiUrl.IsEnabled = true;
                 TxtModelName.IsEnabled = true;
-            }
-        }
-
-        private void ComboOcrServiceProvider_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            // Prevent execution during initialization
-            if (!_isInitialized || TxtOcrApiUrl == null || TxtOcrModel == null) return;
-
-            if (ComboOcrServiceProvider.SelectedIndex == 1) // 硅基流动
-            {
-                TxtOcrApiUrl.Text = "https://api.siliconflow.cn/v1/ocr";
-                TxtOcrModel.Text = "Qwen/Qwen3-VL-235B-A22B-Instruct";
-            }
-            else // PaddleOCR（在线）
-            {
-                TxtOcrApiUrl.Text = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
-                TxtOcrModel.Text = "PaddleOCR-VL-1.5";
             }
         }
 
@@ -222,26 +241,20 @@ namespace PeachOCR
 
                 using (var httpClient = new System.Net.Http.HttpClient())
                 {
-                    httpClient.Timeout = TimeSpan.FromSeconds(30); // 设置超时时间
+                    httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-                    // Prepare test request with a simple valid image
-                    var testImageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="; // 1x1 transparent PNG
+                    var testImageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
-                    // Convert base64 to bytes
                     byte[] imageBytes = Convert.FromBase64String(testImageBase64);
 
-                    // Create multipart form data
                     using var formData = new System.Net.Http.MultipartFormDataContent();
 
-                    // Add file
                     var fileContent = new System.Net.Http.ByteArrayContent(imageBytes);
                     fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("image/png");
                     formData.Add(fileContent, "file", "test.png");
 
-                    // Add model parameter
                     formData.Add(new System.Net.Http.StringContent("PaddleOCR-VL-1.5"), "model");
 
-                    // Add optional payload as JSON string
                     var optionalPayload = new
                     {
                         useDocOrientationClassify = false,
@@ -251,11 +264,9 @@ namespace PeachOCR
                     var optionalPayloadJson = System.Text.Json.JsonSerializer.Serialize(optionalPayload);
                     formData.Add(new System.Net.Http.StringContent(optionalPayloadJson), "optionalPayload");
 
-                    // Add authorization header
                     httpClient.DefaultRequestHeaders.Clear();
                     httpClient.DefaultRequestHeaders.Add("Authorization", $"bearer {ocrApiKey}");
 
-                    // Send test request
                     var response = await httpClient.PostAsync(TxtOcrApiUrl.Text.Trim(), formData);
 
                     if (response.IsSuccessStatusCode)
@@ -267,7 +278,6 @@ namespace PeachOCR
                             using var jsonDoc = System.Text.Json.JsonDocument.Parse(responseContent);
                             var root = jsonDoc.RootElement;
 
-                            // 检查异步API响应格式 (code/data)
                             if (root.TryGetProperty("code", out var codeElement))
                             {
                                 int code = codeElement.GetInt32();
@@ -285,7 +295,6 @@ namespace PeachOCR
                                     TxtOcrConnectionStatus.Foreground = System.Windows.Media.Brushes.Red;
                                 }
                             }
-                            // 检查同步API响应格式 (errorCode/result)
                             else if (root.TryGetProperty("errorCode", out var errorCodeElement))
                             {
                                 int errorCode = errorCodeElement.GetInt32();
@@ -305,7 +314,6 @@ namespace PeachOCR
                             }
                             else
                             {
-                                // 如果没有找到已知的响应格式字段
                                 TxtOcrConnectionStatus.Text = "❌ OCR响应格式异常";
                                 TxtOcrConnectionStatus.Foreground = System.Windows.Media.Brushes.Red;
                             }
@@ -336,6 +344,31 @@ namespace PeachOCR
             }
         }
 
+        private void BtnCaptureHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isCapturingHotkey)
+            {
+                _isCapturingHotkey = false;
+                BtnCaptureHotkey.Content = "点击设置";
+                return;
+            }
+
+            _isCapturingHotkey = true;
+            _capturedHotkey = string.Empty;
+            _capturedKey = Key.None;
+            _capturedModifiers = ModifierKeys.None;
+            BtnCaptureHotkey.Content = "取消";
+            TxtScreenshotHotkey.Text = "请按下快捷键...";
+        }
+
+        private void BtnClearHotkey_Click(object sender, RoutedEventArgs e)
+        {
+            TxtScreenshotHotkey.Text = string.Empty;
+            _capturedHotkey = string.Empty;
+            _capturedKey = Key.None;
+            _capturedModifiers = ModifierKeys.None;
+        }
+
         private void BtnToggleApiKey_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
@@ -364,7 +397,6 @@ namespace PeachOCR
 
             if (btn.Content.ToString() == "👁")
             {
-                // 显示密码：创建TextBox显示密码
                 var textBox = new TextBox
                 {
                     Text = currentPassword,
@@ -389,7 +421,6 @@ namespace PeachOCR
             }
             else
             {
-                // 隐藏密码：创建PasswordBox
                 var pwdBox = new PasswordBox
                 {
                     Password = currentPassword,
@@ -442,7 +473,6 @@ namespace PeachOCR
 
             if (btn.Content.ToString() == "👁")
             {
-                // 显示密码：创建TextBox显示密码
                 var textBox = new TextBox
                 {
                     Text = currentPassword,
@@ -467,7 +497,6 @@ namespace PeachOCR
             }
             else
             {
-                // 隐藏密码：创建PasswordBox
                 var pwdBox = new PasswordBox
                 {
                     Password = currentPassword,
@@ -521,8 +550,7 @@ namespace PeachOCR
 
             if (result == MessageBoxResult.Yes)
             {
-                // Reset based on current service provider
-                if (ComboServiceProvider.SelectedIndex == 1) // DeepSeek
+                if (ComboServiceProvider.SelectedIndex == 1)
                 {
                     _settings.ResetToDeepSeekDefaults();
                 }

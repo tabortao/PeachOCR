@@ -31,6 +31,7 @@ namespace PeachOCR
         // AI相关字段
         private AISettings? _aiSettings;
         private AIService? _aiService;
+        private GlobalHotkeyManager? _hotkeyManager;
         // 注意：不要声明任何和XAML控件同名的字段，否则会导致自动生成失效
 
         // 双击识别结果区域，打开对应的txt文件
@@ -88,6 +89,7 @@ namespace PeachOCR
             var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
             if (txtFileStatus != null) txtFileStatus.Text = "未选择文件";
             this.MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) this.DragMove(); };
+            this.Closed += MainWindow_Closed;
             var listImages = this.FindName("ListImages") as ListBox;
             if (listImages != null) listImages.SelectionChanged += ListImages_SelectionChanged;
             UpdateListImagesHint();
@@ -708,7 +710,8 @@ namespace PeachOCR
                 OcrServiceProvider = Properties.Settings.Default.OCRServiceProvider,
                 OcrApiUrl = Properties.Settings.Default.OCRApiUrl,
                 OcrApiKey = Properties.Settings.Default.OCRApiKey,
-                OcrModel = Properties.Settings.Default.OCRModel
+                OcrModel = Properties.Settings.Default.OCRModel,
+                ScreenshotHotkey = Properties.Settings.Default.ScreenshotHotkey
             }!;
         }
 
@@ -728,6 +731,7 @@ namespace PeachOCR
             Properties.Settings.Default.OCRApiUrl = _aiSettings.OcrApiUrl;
             Properties.Settings.Default.OCRApiKey = _aiSettings.OcrApiKey;
             Properties.Settings.Default.OCRModel = _aiSettings.OcrModel;
+            Properties.Settings.Default.ScreenshotHotkey = _aiSettings.ScreenshotHotkey;
             Properties.Settings.Default.Save();
         }
 
@@ -1104,9 +1108,66 @@ namespace PeachOCR
             }
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _hotkeyManager = new GlobalHotkeyManager();
+            _hotkeyManager.ScreenshotHotkeyPressed += HotkeyManager_ScreenshotHotkeyPressed;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                string hotkey = Properties.Settings.Default.ScreenshotHotkey;
+                if (!string.IsNullOrWhiteSpace(hotkey))
+                {
+                    _hotkeyManager?.Register(this);
+                    var statusBarText = this.FindName("StatusBarText") as TextBlock;
+                    if (statusBarText != null)
+                        statusBarText.Text = $"截图快捷键：{hotkey}";
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            _hotkeyManager?.Dispose();
+        }
+
+        private void HotkeyManager_ScreenshotHotkeyPressed(object? sender, EventArgs e)
+        {
+            System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
+                $"Hotkey pressed at {DateTime.Now}\n" +
+                $"Window State: {this.WindowState}\n" +
+                $"Is Active: {this.IsActive}\n" +
+                $"Is Loaded: {this.IsLoaded}");
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
+                    $"\nIn Dispatcher - Window State: {this.WindowState}");
+
+                if (this.WindowState == WindowState.Minimized)
+                {
+                    this.WindowState = WindowState.Normal;
+                }
+
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                this.Activate();
+                this.Topmost = true;
+                this.Topmost = false;
+                this.Focus();
+
+                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
+                    $"\nBefore BtnScreenshot_Click");
+
+                BtnScreenshot_Click(null, null);
+
+                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
+                    $"\nAfter BtnScreenshot_Click");
+            });
+        }
+
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            // 清理AI服务资源
+            _hotkeyManager?.Dispose();
             _aiService?.Dispose();
             base.OnClosing(e);
         }

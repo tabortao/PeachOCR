@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="PeachOCR 批量识别" Height="650" Width="950" MinWidth="900" MinHeight="600"
         Background="#1E1E1E" Icon="pack://application:,,,/Resources/app_icon.ico"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen" Loaded="Window_Loaded">
     <Window.Resources>
         <!-- 阴影效果 -->
         <DropShadowEffect x:Key="DropShadow" BlurRadius="8" ShadowDepth="2" Opacity="0.3" Color="Black"/>
