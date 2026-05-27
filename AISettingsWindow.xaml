@@ -189,7 +189,12 @@
                         <TextBox x:Name="TxtApiUrl" Text="https://api.openai.com/v1"/>
 
                         <Label Content="API密钥："/>
-                        <PasswordBox x:Name="PwdApiKey"/>
+                        <StackPanel Orientation="Horizontal">
+                            <PasswordBox x:Name="PwdApiKey" Width="600"/>
+                            <Button x:Name="BtnToggleApiKey" Content="👁" Width="30" Height="28" Margin="5,5,0,10" 
+                                    Style="{StaticResource SecondaryButton}" Click="BtnToggleApiKey_Click"
+                                    ToolTip="显示/隐藏密码"/>
+                        </StackPanel>
 
                         <Label Content="模型名称："/>
                         <TextBox x:Name="TxtModelName" Text="gpt-3.5-turbo" ToolTip="对于DeepSeek，默认使用deepseek-v4-flash，您也可以输入其他支持的模型名称"/>
@@ -217,7 +222,12 @@
                         <TextBox x:Name="TxtOcrApiUrl" ToolTip="OCR服务商的API地址或JOB_URL"/>
 
                         <Label Content="API密钥："/>
-                        <PasswordBox x:Name="PwdOcrApiKey" ToolTip="OCR服务商的TOKEN或API密钥"/>
+                        <StackPanel Orientation="Horizontal">
+                            <PasswordBox x:Name="PwdOcrApiKey" Width="600" ToolTip="OCR服务商的TOKEN或API密钥"/>
+                            <Button x:Name="BtnToggleOcrApiKey" Content="👁" Width="30" Height="28" Margin="5,5,0,10" 
+                                    Style="{StaticResource SecondaryButton}" Click="BtnToggleOcrApiKey_Click"
+                                    ToolTip="显示/隐藏密码"/>
+                        </StackPanel>
 
                         <Label Content="OCR模型："/>
                         <TextBox x:Name="TxtOcrModel" ToolTip="OCR服务商支持的模型名称"/>

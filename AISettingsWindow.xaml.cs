@@ -87,7 +87,7 @@ namespace PeachOCR
                 _settings.ModelName = TxtModelName.Text.Trim();
             }
 
-            _settings.ApiKey = PwdApiKey.Password;
+            _settings.ApiKey = GetApiKey();
             _settings.OcrEnhancementPrompt = TxtOcrEnhancementPrompt.Text;
             _settings.AnalysisPrompt = TxtAnalysisPrompt.Text;
             _settings.TranslationPrompt = TxtTranslationPrompt.Text;
@@ -112,7 +112,7 @@ namespace PeachOCR
                 _settings.OcrServiceProvider = "PaddleOCR（在线）";
             }
             _settings.OcrApiUrl = TxtOcrApiUrl.Text.Trim();
-            _settings.OcrApiKey = PwdOcrApiKey.Password;
+            _settings.OcrApiKey = GetOcrApiKey();
             _settings.OcrModel = TxtOcrModel.Text.Trim();
 
             _isModified = true;
@@ -120,8 +120,9 @@ namespace PeachOCR
 
         private async void BtnTestConnection_Click(object sender, RoutedEventArgs e)
         {
+            string apiKey = GetApiKey();
             if (string.IsNullOrWhiteSpace(TxtApiUrl.Text) ||
-                string.IsNullOrWhiteSpace(PwdApiKey.Password) ||
+                string.IsNullOrWhiteSpace(apiKey) ||
                 string.IsNullOrWhiteSpace(TxtModelName.Text))
             {
                 MessageBox.Show("请填写完整的API配置信息", "配置不完整", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -137,7 +138,7 @@ namespace PeachOCR
                 var testSettings = new AISettings
                 {
                     ApiUrl = TxtApiUrl.Text.Trim(),
-                    ApiKey = PwdApiKey.Password,
+                    ApiKey = apiKey,
                     ModelName = TxtModelName.Text.Trim()
                 };
 
@@ -206,8 +207,9 @@ namespace PeachOCR
 
         private async void BtnTestOcrConnection_Click(object sender, RoutedEventArgs e)
         {
+            string ocrApiKey = GetOcrApiKey();
             if (string.IsNullOrWhiteSpace(TxtOcrApiUrl.Text) ||
-                string.IsNullOrWhiteSpace(PwdOcrApiKey.Password))
+                string.IsNullOrWhiteSpace(ocrApiKey))
             {
                 MessageBox.Show("请填写完整的OCR配置信息", "配置不完整", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
@@ -251,7 +253,7 @@ namespace PeachOCR
 
                     // Add authorization header
                     httpClient.DefaultRequestHeaders.Clear();
-                    httpClient.DefaultRequestHeaders.Add("Authorization", $"bearer {PwdOcrApiKey.Password}");
+                    httpClient.DefaultRequestHeaders.Add("Authorization", $"bearer {ocrApiKey}");
 
                     // Send test request
                     var response = await httpClient.PostAsync(TxtOcrApiUrl.Text.Trim(), formData);
@@ -334,10 +336,167 @@ namespace PeachOCR
             }
         }
 
+        private void BtnToggleApiKey_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+
+            var parent = btn.Parent as StackPanel;
+            if (parent == null) return;
+
+            string currentPassword = string.Empty;
+            PasswordBox existingPwdBox = null;
+            TextBox existingTextBox = null;
+
+            foreach (var child in parent.Children)
+            {
+                if (child is PasswordBox pwdBox)
+                {
+                    existingPwdBox = pwdBox;
+                    currentPassword = pwdBox.Password;
+                }
+                else if (child is TextBox textBox)
+                {
+                    existingTextBox = textBox;
+                    currentPassword = textBox.Text;
+                }
+            }
+
+            if (btn.Content.ToString() == "👁")
+            {
+                // 显示密码：创建TextBox显示密码
+                var textBox = new TextBox
+                {
+                    Text = currentPassword,
+                    Width = 600,
+                    Margin = new Thickness(0, 5, 0, 10),
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Microsoft YaHei, Arial"),
+                    FontSize = 14,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    Background = System.Windows.Media.Brushes.DarkGray,
+                    BorderBrush = System.Windows.Media.Brushes.Gray,
+                    BorderThickness = new System.Windows.Thickness(1),
+                    Padding = new Thickness(8, 4, 8, 4)
+                };
+
+                if (existingPwdBox != null)
+                {
+                    int index = parent.Children.IndexOf(existingPwdBox);
+                    parent.Children.RemoveAt(index);
+                    parent.Children.Insert(index, textBox);
+                }
+                btn.Content = "🙈";
+            }
+            else
+            {
+                // 隐藏密码：创建PasswordBox
+                var pwdBox = new PasswordBox
+                {
+                    Password = currentPassword,
+                    Width = 600,
+                    Margin = new Thickness(0, 5, 0, 10),
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Microsoft YaHei, Arial"),
+                    FontSize = 14,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    Background = System.Windows.Media.Brushes.DarkGray,
+                    BorderBrush = System.Windows.Media.Brushes.Gray,
+                    BorderThickness = new System.Windows.Thickness(1),
+                    Padding = new Thickness(8, 4, 8, 4)
+                };
+
+                if (existingTextBox != null)
+                {
+                    int index = parent.Children.IndexOf(existingTextBox);
+                    parent.Children.RemoveAt(index);
+                    parent.Children.Insert(index, pwdBox);
+                }
+                btn.Content = "👁";
+            }
+        }
+
+        private void BtnToggleOcrApiKey_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null) return;
+
+            var parent = btn.Parent as StackPanel;
+            if (parent == null) return;
+
+            string currentPassword = string.Empty;
+            PasswordBox existingPwdBox = null;
+            TextBox existingTextBox = null;
+
+            foreach (var child in parent.Children)
+            {
+                if (child is PasswordBox pwdBox)
+                {
+                    existingPwdBox = pwdBox;
+                    currentPassword = pwdBox.Password;
+                }
+                else if (child is TextBox textBox)
+                {
+                    existingTextBox = textBox;
+                    currentPassword = textBox.Text;
+                }
+            }
+
+            if (btn.Content.ToString() == "👁")
+            {
+                // 显示密码：创建TextBox显示密码
+                var textBox = new TextBox
+                {
+                    Text = currentPassword,
+                    Width = 600,
+                    Margin = new Thickness(0, 5, 0, 10),
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Microsoft YaHei, Arial"),
+                    FontSize = 14,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    Background = System.Windows.Media.Brushes.DarkGray,
+                    BorderBrush = System.Windows.Media.Brushes.Gray,
+                    BorderThickness = new System.Windows.Thickness(1),
+                    Padding = new Thickness(8, 4, 8, 4)
+                };
+
+                if (existingPwdBox != null)
+                {
+                    int index = parent.Children.IndexOf(existingPwdBox);
+                    parent.Children.RemoveAt(index);
+                    parent.Children.Insert(index, textBox);
+                }
+                btn.Content = "🙈";
+            }
+            else
+            {
+                // 隐藏密码：创建PasswordBox
+                var pwdBox = new PasswordBox
+                {
+                    Password = currentPassword,
+                    Width = 600,
+                    Margin = new Thickness(0, 5, 0, 10),
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Microsoft YaHei, Arial"),
+                    FontSize = 14,
+                    Foreground = System.Windows.Media.Brushes.White,
+                    Background = System.Windows.Media.Brushes.DarkGray,
+                    BorderBrush = System.Windows.Media.Brushes.Gray,
+                    BorderThickness = new System.Windows.Thickness(1),
+                    Padding = new Thickness(8, 4, 8, 4)
+                };
+
+                if (existingTextBox != null)
+                {
+                    int index = parent.Children.IndexOf(existingTextBox);
+                    parent.Children.RemoveAt(index);
+                    parent.Children.Insert(index, pwdBox);
+                }
+                btn.Content = "👁";
+            }
+        }
+
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            string apiKey = GetApiKey();
             if (string.IsNullOrWhiteSpace(TxtApiUrl.Text) ||
-                string.IsNullOrWhiteSpace(PwdApiKey.Password) ||
+                string.IsNullOrWhiteSpace(apiKey) ||
                 string.IsNullOrWhiteSpace(TxtModelName.Text))
             {
                 MessageBox.Show("请填写完整的API配置信息", "配置不完整", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -373,6 +532,46 @@ namespace PeachOCR
                 }
                 LoadSettings();
             }
+        }
+
+        private string GetApiKey()
+        {
+            var stackPanel = BtnToggleApiKey.Parent as StackPanel;
+            if (stackPanel != null)
+            {
+                foreach (var child in stackPanel.Children)
+                {
+                    if (child is PasswordBox pwdBox)
+                    {
+                        return pwdBox.Password;
+                    }
+                    else if (child is TextBox textBox)
+                    {
+                        return textBox.Text;
+                    }
+                }
+            }
+            return string.Empty;
+        }
+
+        private string GetOcrApiKey()
+        {
+            var stackPanel = BtnToggleOcrApiKey.Parent as StackPanel;
+            if (stackPanel != null)
+            {
+                foreach (var child in stackPanel.Children)
+                {
+                    if (child is PasswordBox pwdBox)
+                    {
+                        return pwdBox.Password;
+                    }
+                    else if (child is TextBox textBox)
+                    {
+                        return textBox.Text;
+                    }
+                }
+            }
+            return string.Empty;
         }
 
         public bool IsModified => _isModified;

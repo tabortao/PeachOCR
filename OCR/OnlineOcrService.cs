@@ -104,7 +104,7 @@ namespace PeachOCR.OCR
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"OCR request failed: {response.StatusCode} - {errorContent}");
+                    throw new Exception($"OCR连接失败，{response.StatusCode} - {errorContent}");
                 }
 
                 var responseContent = await response.Content.ReadAsStringAsync();

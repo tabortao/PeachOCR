@@ -2,10 +2,12 @@
 
 ## TODO
 
-- 增加在线API进行OCR（MinerU、PaddleOCR API）的功能
-- <https://aistudio.baidu.com/paddleocr>
 - 新增Windows本地OCR功能
-- 探索更多AI功能集成可能性
+- 增加微信OCR功能
+
+### 0.8.3 - 2026-05-27
+- feat(截图): 新增截图OCR功能
+- 增加在线API进行OCR（MinerU、PaddleOCR API）的功能 <https://aistudio.baidu.com/paddleocr>
 
 ### 0.8.2 - 2026-05-08
 
