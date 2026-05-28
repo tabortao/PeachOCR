@@ -6,7 +6,10 @@
 - 增加微信OCR功能（https://www.nuget.org/packages/WeChatOcr、https://github.com/ZGGSONG/WeChatOcr/）
 - 新增MinerU OCR功能
 
-### 0.8.4 - 2026-05-28
+## 0.8.5 - 2026-05-28
+- feat(快捷键截图)：快捷键截图 OCR 现在会使用与主界面模型选择下拉框相同的模型，包括 WeChat-OCR(本地)
+
+## 0.8.4 - 2026-05-28
 - feat(OCR结果): OCR完成后自动将识别结果复制到系统剪切板
 - feat(OCR结果): 在结果显示窗口中自动复制结果到剪切板
 - feat(状态栏): 更新状态栏文本，提示结果已复制到剪切板

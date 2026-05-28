@@ -1273,26 +1273,37 @@ namespace PeachOCR
                 var comboModel = this.FindName("ComboModel") as ComboBox;
                 var checkGpu = this.FindName("CheckGpu") as CheckBox;
 
-                var processor = new OcrBatchProcessor();
-                processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
-                processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
-                processor.SetSaveResultImage(false);
-                processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
-
-                if (comboModel != null && comboModel.SelectedIndex >= 2 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+                if (comboModel != null && comboModel.SelectedIndex == 2)
                 {
-                    processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
-                }
-
-                processor.AddImage(filePath);
-                var result = await processor.RunBatchOcrAsync(2);
-                var details = result.details;
-                var totalMs = result.totalMs;
-
-                if (details.Count > 0 && details[0].Result != null)
-                {
-                    var resultText = string.Join(Environment.NewLine, details[0].Result.Select(r => r.text));
+                    // 使用 WeChat-OCR(本地)
+                    var wechatOcr = new OCR.WeChatOcrService();
+                    var lines = await wechatOcr.RecognizeTextAsync(filePath);
+                    var resultText = string.Join(Environment.NewLine, lines);
                     ShowOcrResultWindow(resultText);
+                }
+                else
+                {
+                    // 使用其他模型
+                    var processor = new OcrBatchProcessor();
+                    processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+                    processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
+                    processor.SetSaveResultImage(false);
+                    processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
+
+                    if (comboModel != null && comboModel.SelectedIndex >= 3 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+                    {
+                        processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
+                    }
+
+                    processor.AddImage(filePath);
+                    var result = await processor.RunBatchOcrAsync(2);
+                    var details = result.details;
+
+                    if (details.Count > 0 && details[0].Result != null)
+                    {
+                        var resultText = string.Join(Environment.NewLine, details[0].Result.Select(r => r.text));
+                        ShowOcrResultWindow(resultText);
+                    }
                 }
             }
             catch (Exception ex)
