@@ -6,6 +6,16 @@
 - 增加微信OCR功能（https://www.nuget.org/packages/WeChatOcr、https://github.com/ZGGSONG/WeChatOcr/）
 - 新增MinerU OCR功能
 
+## 0.8.7 - 2026-05-28
+- fix(微信OCR)：修复 WeChatOCR DLL 加载路径问题，在程序启动时设置正确的工作目录
+- feat(微信OCR)：支持批量处理多个文件，每个文件之间添加 100ms 间隔避免服务过载
+- fix(微信OCR)：优化批量处理性能，缩短文件间延迟时间
+- fix(WeChatOcrService)：简化实现，移除不必要的 DLL 复制逻辑（WeChatOCR 包已包含所需资源）
+
+## 0.8.6 - 2026-05-28
+- fix(微信OCR)：优化 WeChatOcr 服务，添加 DLL 文件检查复制、超时机制和任务防止重复
+- fix(警告)：消除了所有编译警告
+
 ## 0.8.5 - 2026-05-28
 - feat(快捷键截图)：快捷键截图 OCR 现在会使用与主界面模型选择下拉框相同的模型，包括 WeChat-OCR(本地)
 

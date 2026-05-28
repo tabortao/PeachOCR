@@ -378,8 +378,8 @@ namespace PeachOCR
             if (parent == null) return;
 
             string currentPassword = string.Empty;
-            PasswordBox existingPwdBox = null;
-            TextBox existingTextBox = null;
+            PasswordBox? existingPwdBox = null;
+            TextBox? existingTextBox = null;
 
             foreach (var child in parent.Children)
             {
@@ -454,8 +454,8 @@ namespace PeachOCR
             if (parent == null) return;
 
             string currentPassword = string.Empty;
-            PasswordBox existingPwdBox = null;
-            TextBox existingTextBox = null;
+            PasswordBox? existingPwdBox = null;
+            TextBox? existingTextBox = null;
 
             foreach (var child in parent.Children)
             {

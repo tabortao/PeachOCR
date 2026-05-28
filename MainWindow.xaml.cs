@@ -150,17 +150,17 @@ namespace PeachOCR
             this.Hide();
         }
 
-        private void NotifyIcon_DoubleClick(object sender, EventArgs e)
+        private void NotifyIcon_DoubleClick(object? sender, EventArgs e)
         {
             ShowWindow();
         }
 
-        private void ShowMenuItem_Click(object sender, EventArgs e)
+        private void ShowMenuItem_Click(object? sender, EventArgs e)
         {
             ShowWindow();
         }
 
-        private void ExitMenuItem_Click(object sender, EventArgs e)
+        private void ExitMenuItem_Click(object? sender, EventArgs e)
         {
             ExitApplication();
         }
@@ -289,8 +289,9 @@ namespace PeachOCR
             {
                 var wechatOcr = new OCR.WeChatOcrService();
                 
-                foreach (var imgPath in allOcrImages)
+                for (int i = 0; i < allOcrImages.Count; i++)
                 {
+                    var imgPath = allOcrImages[i];
                     try
                     {
                         var lines = await wechatOcr.RecognizeTextAsync(imgPath);
@@ -305,6 +306,12 @@ namespace PeachOCR
                     {
                         int done = imgToText.Count;
                         progressOcr.Value = total > 0 ? done * 100.0 / total : 0;
+                    }
+
+                    // 微信 OCR 每个文件之间添加微小间隔，避免服务过载
+                    if (i < allOcrImages.Count - 1)
+                    {
+                        await Task.Delay(100);
                     }
                 }
             }
@@ -1227,7 +1234,7 @@ namespace PeachOCR
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
-        private void MainWindow_Closed(object sender, EventArgs e)
+        private void MainWindow_Closed(object? sender, EventArgs e)
         {
             _hotkeyManager?.Dispose();
         }
@@ -1301,7 +1308,7 @@ namespace PeachOCR
 
                     if (details.Count > 0 && details[0].Result != null)
                     {
-                        var resultText = string.Join(Environment.NewLine, details[0].Result.Select(r => r.text));
+                        var resultText = string.Join(Environment.NewLine, details[0].Result!.Select(r => r.text));
                         ShowOcrResultWindow(resultText);
                     }
                 }
