@@ -18,7 +18,7 @@ namespace PeachOCR
         private string _ocrServiceProvider = "PaddleOCR（在线）";
         private string _ocrApiUrl = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
         private string _ocrApiKey = string.Empty;
-        private string _ocrModel = "PaddleOCR-VL-1.5";
+        private string _ocrModel = "PaddleOCR-VL-1.6";
 
         private string _screenshotHotkey = string.Empty;
 
@@ -132,7 +132,7 @@ namespace PeachOCR
             OcrServiceProvider = "PaddleOCR（在线）";
             OcrApiUrl = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
             OcrApiKey = string.Empty;
-            OcrModel = "PaddleOCR-VL-1.5";
+            OcrModel = "PaddleOCR-VL-1.6";
             ScreenshotHotkey = string.Empty;
         }
 
@@ -149,7 +149,7 @@ namespace PeachOCR
             OcrServiceProvider = "PaddleOCR（在线）";
             OcrApiUrl = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
             OcrApiKey = string.Empty;
-            OcrModel = "PaddleOCR-VL-1.5";
+            OcrModel = "PaddleOCR-VL-1.6";
             ScreenshotHotkey = string.Empty;
         }
     }

@@ -253,7 +253,7 @@ namespace PeachOCR
                     fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("image/png");
                     formData.Add(fileContent, "file", "test.png");
 
-                    formData.Add(new System.Net.Http.StringContent("PaddleOCR-VL-1.5"), "model");
+                    formData.Add(new System.Net.Http.StringContent("PaddleOCR-VL-1.6"), "model");
 
                     var optionalPayload = new
                     {

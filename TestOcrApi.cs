@@ -28,7 +28,7 @@ namespace PeachOCR
                 formData.Add(fileContent, "file", "test.png");
 
                 // Add model parameter
-                formData.Add(new StringContent("PaddleOCR-VL-1.5"), "model");
+                formData.Add(new StringContent("PaddleOCR-VL-1.6"), "model");
 
                 // Add optional payload as JSON string
                 var optionalPayload = new

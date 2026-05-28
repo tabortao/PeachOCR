@@ -157,7 +157,7 @@ namespace PeachOCR.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("PaddleOCR-VL-1.5")]
+        [global::System.Configuration.DefaultSettingValueAttribute("PaddleOCR-VL-1.6")]
         public string OCRModel {
             get {
                 return ((string)(this["OCRModel"]));
