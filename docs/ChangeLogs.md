@@ -4,11 +4,14 @@
 
 - 新增Windows本地OCR功能
 - 增加微信OCR功能
+- 新增MinerU OCR功能
 
 ### 0.8.3 - 2026-05-27
 - feat(截图): 新增截图OCR功能
 - feat(截图): 新增区域选择截图功能（使用PracticalToolkit.Screenshot库 https://www.nuget.org/packages/PracticalToolkit.Screenshot）
 - feat(快捷键): 添加截图OCR全局快捷键支持，可在设置中自定义快捷键，支持直接按键输入无需弹窗
+- feat(快捷键): 优化快捷键功能，支持最小化到托盘时后台执行截图OCR，完成后弹出结果显示窗口
+- feat(托盘): 添加系统托盘功能，点击关闭按钮最小化到托盘，双击托盘显示窗口，右键菜单可退出
 - feat(设置): AI OCR配置中移除硅基流动选项，仅保留PaddleOCR（在线）
 - feat(设置): 添加API密钥的显示/隐藏切换功能
 - fix(快捷键): 修复快捷键触发时窗口激活问题，确保窗口正常响应
@@ -145,4 +148,3 @@
 - **ui**: 优化UI显示
   - 现代化深色主题
   - 改进控件布局和样式
-

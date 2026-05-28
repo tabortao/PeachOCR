@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
@@ -32,6 +33,9 @@ namespace PeachOCR
         private AISettings? _aiSettings;
         private AIService? _aiService;
         private GlobalHotkeyManager? _hotkeyManager;
+        // 系统托盘相关字段
+        private System.Windows.Forms.NotifyIcon? _notifyIcon;
+        private System.Windows.Forms.ContextMenuStrip? _trayMenu;
         // 注意：不要声明任何和XAML控件同名的字段，否则会导致自动生成失效
 
         // 双击识别结果区域，打开对应的txt文件
@@ -101,6 +105,40 @@ namespace PeachOCR
                 this.Title = $"PeachOCR 批量识别 v{ver?.ToString(3) ?? "?"}";
             }
             catch { /* ignore */ }
+
+            // 初始化系统托盘
+            InitializeNotifyIcon();
+        }
+
+        private void InitializeNotifyIcon()
+        {
+            _notifyIcon = new System.Windows.Forms.NotifyIcon();
+            
+            string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "app_icon.ico");
+            if (File.Exists(iconPath))
+            {
+                _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+            }
+            else
+            {
+                _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
+            }
+            
+            _notifyIcon.Text = "PeachOCR";
+            _notifyIcon.Visible = true;
+            _notifyIcon.DoubleClick += NotifyIcon_DoubleClick;
+
+            // 创建右键菜单
+            _trayMenu = new System.Windows.Forms.ContextMenuStrip();
+            var showMenuItem = new System.Windows.Forms.ToolStripMenuItem("显示窗口");
+            showMenuItem.Click += ShowMenuItem_Click;
+            _trayMenu.Items.Add(showMenuItem);
+
+            var exitMenuItem = new System.Windows.Forms.ToolStripMenuItem("退出");
+            exitMenuItem.Click += ExitMenuItem_Click;
+            _trayMenu.Items.Add(exitMenuItem);
+
+            _notifyIcon.ContextMenuStrip = _trayMenu;
         }
 
         private void OnMinimizeClick(object sender, RoutedEventArgs e)
@@ -109,7 +147,37 @@ namespace PeachOCR
         }
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.Hide();
+        }
+
+        private void NotifyIcon_DoubleClick(object sender, EventArgs e)
+        {
+            ShowWindow();
+        }
+
+        private void ShowMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowWindow();
+        }
+
+        private void ExitMenuItem_Click(object sender, EventArgs e)
+        {
+            ExitApplication();
+        }
+
+        private void ShowWindow()
+        {
+            this.Show();
+            this.WindowState = WindowState.Normal;
+            this.Activate();
+        }
+
+        private void ExitApplication()
+        {
+            _notifyIcon?.Dispose();
+            _hotkeyManager?.Dispose();
+            _aiService?.Dispose();
+            System.Windows.Application.Current.Shutdown();
         }
         private async void BtnScreenshot_Click(object sender, RoutedEventArgs e)
         {
@@ -362,24 +430,24 @@ namespace PeachOCR
             UpdateListImagesHint();
         }
              // 支持拖拽文件到文件列表
-        private void ListImages_PreviewDragOver(object sender, DragEventArgs e)
+        private void ListImages_PreviewDragOver(object sender, System.Windows.DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
             {
-                e.Effects = DragDropEffects.Copy;
+                e.Effects = System.Windows.DragDropEffects.Copy;
             }
             else
             {
-                e.Effects = DragDropEffects.None;
+                e.Effects = System.Windows.DragDropEffects.None;
             }
             e.Handled = true;
         }
 
-        private void ListImages_Drop(object sender, DragEventArgs e)
+        private void ListImages_Drop(object sender, System.Windows.DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
             {
-                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                var files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
                 var supported = new[] { ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".pdf" };
                 var addFiles = files.Where(f => supported.Contains(System.IO.Path.GetExtension(f).ToLower())).ToList();
                 if (addFiles.Count > 0)
@@ -1130,7 +1198,7 @@ namespace PeachOCR
             _hotkeyManager?.Dispose();
         }
 
-        private void HotkeyManager_ScreenshotHotkeyPressed(object? sender, EventArgs e)
+        private async void HotkeyManager_ScreenshotHotkeyPressed(object? sender, EventArgs e)
         {
             System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
                 $"Hotkey pressed at {DateTime.Now}\n" +
@@ -1138,38 +1206,78 @@ namespace PeachOCR
                 $"Is Active: {this.IsActive}\n" +
                 $"Is Loaded: {this.IsLoaded}");
 
-            Dispatcher.InvokeAsync(() =>
+            await Dispatcher.InvokeAsync(async () =>
             {
                 System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
-                    $"\nIn Dispatcher - Window State: {this.WindowState}");
+                    $"\nStarting background OCR...");
 
-                if (this.WindowState == WindowState.Minimized)
+                await PerformHotkeyOcrAsync();
+
+                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
+                    $"\nBackground OCR completed");
+            });
+        }
+
+        private async Task PerformHotkeyOcrAsync()
+        {
+            try
+            {
+                using var runner = new PracticalToolkit.Screenshot.ScreenshotRunner();
+                using var bitmap = runner.Screenshot();
+
+                if (bitmap == null)
                 {
-                    this.WindowState = WindowState.Normal;
+                    return;
                 }
 
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.Activate();
-                this.Topmost = true;
-                this.Topmost = false;
-                this.Focus();
+                string tempDir = System.IO.Path.GetTempPath();
+                string fileName = $"screenshot_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+                string filePath = System.IO.Path.Combine(tempDir, fileName);
 
-                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
-                    $"\nBefore BtnScreenshot_Click");
+                bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
 
-                BtnScreenshot_Click(null, null);
+                var comboModel = this.FindName("ComboModel") as ComboBox;
+                var checkGpu = this.FindName("CheckGpu") as CheckBox;
 
-                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "hotkey_debug.txt"),
-                    $"\nAfter BtnScreenshot_Click");
-            });
+                var processor = new OcrBatchProcessor();
+                processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+                processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
+                processor.SetSaveResultImage(false);
+                processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
+
+                if (comboModel != null && comboModel.SelectedIndex >= 2 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+                {
+                    processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
+                }
+
+                processor.AddImage(filePath);
+                var result = await processor.RunBatchOcrAsync(2);
+                var details = result.details;
+                var totalMs = result.totalMs;
+
+                if (details.Count > 0 && details[0].Result != null)
+                {
+                    var resultText = string.Join(Environment.NewLine, details[0].Result.Select(r => r.text));
+                    ShowOcrResultWindow(resultText);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"OCR 失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ShowOcrResultWindow(string ocrResultText)
+        {
+            var resultWindow = new OcrResultWindow(ocrResultText);
+            resultWindow.Show();
+            resultWindow.Activate();
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            _hotkeyManager?.Dispose();
-            _aiService?.Dispose();
-            base.OnClosing(e);
+            e.Cancel = true;
+            this.Hide();
         }
     }
 }
