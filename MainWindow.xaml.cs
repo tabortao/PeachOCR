@@ -282,50 +282,77 @@ namespace PeachOCR
             }
             allOcrImages.AddRange(imageFiles);
 
-            var processor = new OcrBatchProcessor();
-            processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
-            processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
-            processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
-            processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
-
-            if (comboModel != null && comboModel.SelectedIndex >= 2 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
-            {
-                processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
-            }
-
-            processor.AddImages(allOcrImages);
-            int total = allOcrImages.Count;
-            var task = Task.Run(async () =>
-            {
-                var result = await processor.RunBatchOcrAsync(2, (done, all) =>
-                {
-                    if (progressOcr != null)
-                        Dispatcher.Invoke(() =>
-                        {
-                            progressOcr.Value = all > 0 ? done * 100.0 / all : 0;
-                        });
-                });
-                return result;
-            });
-            var result = await task;
-
             var imgToText = new Dictionary<string, List<string>>();
-            foreach (var detail in result.details)
+            int total = allOcrImages.Count;
+
+            if (comboModel != null && comboModel.SelectedIndex == 2)
             {
-                string fileName = System.IO.Path.GetFileName(detail.ImgPath);
-                List<string> lines = new();
-                if (detail.Result == null)
+                var wechatOcr = new OCR.WeChatOcrService();
+                
+                foreach (var imgPath in allOcrImages)
                 {
-                    lines.Add("识别失败");
-                }
-                else
-                {
-                    foreach (var r in detail.Result)
+                    try
                     {
-                        lines.Add(r.text);
+                        var lines = await wechatOcr.RecognizeTextAsync(imgPath);
+                        imgToText[imgPath] = lines;
+                    }
+                    catch (Exception ex)
+                    {
+                        imgToText[imgPath] = new List<string> { $"识别失败: {ex.Message}" };
+                    }
+
+                    if (progressOcr != null)
+                    {
+                        int done = imgToText.Count;
+                        progressOcr.Value = total > 0 ? done * 100.0 / total : 0;
                     }
                 }
-                imgToText[detail.ImgPath] = lines;
+            }
+            else
+            {
+                var processor = new OcrBatchProcessor();
+                processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+                processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
+                processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
+                processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
+
+                if (comboModel != null && comboModel.SelectedIndex >= 3 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+                {
+                    processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
+                }
+
+                processor.AddImages(allOcrImages);
+                var task = Task.Run(async () =>
+                {
+                    var result = await processor.RunBatchOcrAsync(2, (done, all) =>
+                    {
+                        if (progressOcr != null)
+                            Dispatcher.Invoke(() =>
+                            {
+                                progressOcr.Value = all > 0 ? done * 100.0 / all : 0;
+                            });
+                    });
+                    return result;
+                });
+                var result = await task;
+
+                foreach (var detail in result.details)
+                {
+                    string fileName = System.IO.Path.GetFileName(detail.ImgPath);
+                    List<string> lines = new();
+                    if (detail.Result == null)
+                    {
+                        lines.Add("识别失败");
+                    }
+                    else
+                    {
+                        foreach (var r in detail.Result)
+                        {
+                            lines.Add(r.text);
+                        }
+                    }
+                    imgToText[detail.ImgPath] = lines;
+                }
             }
 
             var txtPaths = new List<string>();

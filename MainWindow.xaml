@@ -432,6 +432,7 @@
                     <ComboBox x:Name="ComboModel" Width="200" SelectedIndex="0">
                         <ComboBoxItem Content="PP-OCRv4(本地)"/>
                         <ComboBoxItem Content="PP-OCRv5(本地)"/>
+                        <ComboBoxItem Content="WeChat-OCR(本地)"/>
                         <ComboBoxItem Content="PP-OCR-VL-1.5(在线)"/>
                         <ComboBoxItem Content="硅基-Qwen3-VL(在线)"/>
                     </ComboBox>
