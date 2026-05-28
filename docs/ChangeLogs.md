@@ -6,6 +6,11 @@
 - 增加微信OCR功能
 - 新增MinerU OCR功能
 
+### 0.8.4 - 2026-05-28
+- feat(OCR结果): OCR完成后自动将识别结果复制到系统剪切板
+- feat(OCR结果): 在结果显示窗口中自动复制结果到剪切板
+- feat(状态栏): 更新状态栏文本，提示结果已复制到剪切板
+
 ### 0.8.3 - 2026-05-27
 - feat(截图): 新增截图OCR功能
 - feat(截图): 新增区域选择截图功能（使用PracticalToolkit.Screenshot库 https://www.nuget.org/packages/PracticalToolkit.Screenshot）

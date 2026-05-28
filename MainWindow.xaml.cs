@@ -381,7 +381,14 @@ namespace PeachOCR
                 listImages.SelectedIndex = selectedImages.Count - 1;
                 var lastFile = System.IO.Path.GetFileName(selectedImages[selectedImages.Count - 1]);
                 if (fileResultMap.ContainsKey(lastFile) && listResultsTextBox != null)
-                    listResultsTextBox.Text = string.Join(Environment.NewLine, fileResultMap[lastFile]);
+                {
+                    var resultText = string.Join(Environment.NewLine, fileResultMap[lastFile]);
+                    listResultsTextBox.Text = resultText;
+                    if (!string.IsNullOrEmpty(resultText))
+                    {
+                        System.Windows.Clipboard.SetText(resultText);
+                    }
+                }
             }
 
             if (btnOcr != null) btnOcr.IsEnabled = true;
@@ -389,7 +396,7 @@ namespace PeachOCR
             if (statusBarText != null)
             {
                 string txtInfo = txtPaths.Count == 1 ? txtPaths[0] : string.Join("; ", txtPaths);
-                statusBarText.Text = $"识别完成，耗时{seconds:F1}秒，结果txt路径：{txtInfo}";
+                statusBarText.Text = $"识别完成，耗时{seconds:F1}秒，结果已复制到剪切板，txt路径：{txtInfo}";
             }
         }
 
@@ -1272,6 +1279,10 @@ namespace PeachOCR
             var resultWindow = new OcrResultWindow(ocrResultText);
             resultWindow.Show();
             resultWindow.Activate();
+            if (!string.IsNullOrEmpty(ocrResultText))
+            {
+                System.Windows.Clipboard.SetText(ocrResultText);
+            }
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
