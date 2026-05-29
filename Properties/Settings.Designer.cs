@@ -178,5 +178,41 @@ namespace PeachOCR.Properties {
                 this["ScreenshotHotkey"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool MergeIntoSingleFile {
+            get {
+                return ((bool)(this["MergeIntoSingleFile"]));
+            }
+            set {
+                this["MergeIntoSingleFile"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SaveProcessedImage {
+            get {
+                return ((bool)(this["SaveProcessedImage"]));
+            }
+            set {
+                this["SaveProcessedImage"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableGpu {
+            get {
+                return ((bool)(this["EnableGpu"]));
+            }
+            set {
+                this["EnableGpu"] = value;
+            }
+        }
     }
 }

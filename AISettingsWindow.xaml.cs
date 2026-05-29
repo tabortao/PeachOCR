@@ -109,6 +109,10 @@ namespace PeachOCR
 
             TxtScreenshotHotkey.Text = _settings.ScreenshotHotkey;
 
+            CheckMergeIntoSingleFile.IsChecked = _settings.MergeIntoSingleFile;
+            CheckSaveProcessedImage.IsChecked = _settings.SaveProcessedImage;
+            CheckEnableGpu.IsChecked = _settings.EnableGpu;
+
             TxtConnectionStatus.Text = string.Empty;
             TxtConnectionStatus.Foreground = System.Windows.Media.Brushes.Gray;
             TxtOcrConnectionStatus.Text = string.Empty;
@@ -153,6 +157,10 @@ namespace PeachOCR
             _settings.OcrModel = TxtOcrModel.Text.Trim();
 
             _settings.ScreenshotHotkey = TxtScreenshotHotkey.Text.Trim();
+
+            _settings.MergeIntoSingleFile = CheckMergeIntoSingleFile.IsChecked ?? false;
+            _settings.SaveProcessedImage = CheckSaveProcessedImage.IsChecked ?? false;
+            _settings.EnableGpu = CheckEnableGpu.IsChecked ?? false;
 
             _isModified = true;
         }

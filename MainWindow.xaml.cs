@@ -86,10 +86,6 @@ namespace PeachOCR
             LoadAISettings();
 
             // 初始化控件状态（全部用FindName方式访问，避免partial字段丢失问题）
-            var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
-            if (checkSaveResult != null) checkSaveResult.IsChecked = false;
-            var checkMergeTxt = this.FindName("CheckMergeTxt") as CheckBox;
-            if (checkMergeTxt != null) checkMergeTxt.IsChecked = false;
             var txtFileStatus = this.FindName("TxtFileStatus") as TextBlock;
             if (txtFileStatus != null) txtFileStatus.Text = "未选择文件";
             this.MouseLeftButtonDown += (s, e) => { if (e.ButtonState == MouseButtonState.Pressed) this.DragMove(); };
@@ -235,8 +231,6 @@ namespace PeachOCR
         private async Task PerformOcrAsync()
         {
             var comboModel = this.FindName("ComboModel") as ComboBox;
-            var checkGpu = this.FindName("CheckGpu") as CheckBox;
-            var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
             var progressOcr = this.FindName("ProgressOcr") as ProgressBar;
             var listImages = this.FindName("ListImages") as ListBox;
             var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
@@ -319,8 +313,8 @@ namespace PeachOCR
             {
                 var processor = new OcrBatchProcessor();
                 processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
-                processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
-                processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
+                processor.SetUseGpu(_aiSettings?.EnableGpu ?? false, _aiSettings?.EnableGpu ?? false);
+                processor.SetSaveResultImage(_aiSettings?.SaveProcessedImage ?? false);
                 processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
 
                 if (comboModel != null && comboModel.SelectedIndex >= 3 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
@@ -362,49 +356,7 @@ namespace PeachOCR
                 }
             }
 
-            var txtPaths = new List<string>();
-            var createdResultDirs = new HashSet<string>();
-
-            foreach (var kv in pdfToTxtMap)
-            {
-                string pdfPath = kv.Key;
-                var imgs = kv.Value;
-                var allLines = new List<string>();
-                foreach (var img in imgs)
-                {
-                    if (imgToText.TryGetValue(img, out var lines))
-                        allLines.AddRange(lines);
-                }
-                string srcDir = System.IO.Path.GetDirectoryName(pdfPath) ?? "";
-                string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
-                if (!createdResultDirs.Contains(resultDir))
-                {
-                    System.IO.Directory.CreateDirectory(resultDir);
-                    createdResultDirs.Add(resultDir);
-                }
-                string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(pdfPath) + ".txt");
-                System.IO.File.WriteAllLines(txtPath, allLines);
-                fileResultMap[System.IO.Path.GetFileName(pdfPath)] = allLines;
-                txtPaths.Add(txtPath);
-            }
-
-            foreach (var img in imageFiles)
-            {
-                if (imgToText.TryGetValue(img, out var lines))
-                {
-                    string srcDir = System.IO.Path.GetDirectoryName(img) ?? "";
-                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
-                    if (!createdResultDirs.Contains(resultDir))
-                    {
-                        System.IO.Directory.CreateDirectory(resultDir);
-                        createdResultDirs.Add(resultDir);
-                    }
-                    string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(img) + ".txt");
-                    System.IO.File.WriteAllLines(txtPath, lines);
-                    fileResultMap[System.IO.Path.GetFileName(img)] = lines;
-                    txtPaths.Add(txtPath);
-                }
-            }
+            var txtPaths = SaveOcrResults(imgToText, pdfToTxtMap, pdfFiles, imageFiles, new HashSet<string>());
 
             if (progressOcr != null) progressOcr.Value = 100;
             ocrWatch.Stop();
@@ -577,8 +529,6 @@ namespace PeachOCR
         {
             // 通过FindName获取所有控件，兼容partial字段丢失的情况
             var comboModel = this.FindName("ComboModel") as ComboBox;
-            var checkGpu = this.FindName("CheckGpu") as CheckBox;
-            var checkSaveResult = this.FindName("CheckSaveResult") as CheckBox;
             var progressOcr = this.FindName("ProgressOcr") as ProgressBar;
             var listImages = this.FindName("ListImages") as ListBox;
             var listResultsTextBox = this.FindName("ListResultsTextBox") as TextBox;
@@ -631,8 +581,8 @@ namespace PeachOCR
 
             var processor = new OcrBatchProcessor();
             processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
-            processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
-            processor.SetSaveResultImage(checkSaveResult != null && checkSaveResult.IsChecked == true);
+            processor.SetUseGpu(_aiSettings?.EnableGpu ?? false, _aiSettings?.EnableGpu ?? false);
+            processor.SetSaveResultImage(_aiSettings?.SaveProcessedImage ?? false);
             processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
 
             // 设置在线OCR服务配置（当选择在线模型时）
@@ -677,49 +627,8 @@ namespace PeachOCR
                 imgToText[detail.ImgPath] = lines;
             }
             // 统一将所有txt输出到源文件同级的OCR_Result文件夹，避免重复
-            var txtPaths = new List<string>();
             var createdResultDirs = new HashSet<string>();
-            // PDF合并txt输出
-            foreach (var kv in pdfToTxtMap)
-            {
-                string pdfPath = kv.Key;
-                var imgs = kv.Value;
-                var allLines = new List<string>();
-                foreach (var img in imgs)
-                {
-                    if (imgToText.TryGetValue(img, out var lines))
-                        allLines.AddRange(lines);
-                }
-                string srcDir = System.IO.Path.GetDirectoryName(pdfPath) ?? "";
-                string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
-                if (!createdResultDirs.Contains(resultDir))
-                {
-                    System.IO.Directory.CreateDirectory(resultDir);
-                    createdResultDirs.Add(resultDir);
-                }
-                string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(pdfPath) + ".txt");
-                System.IO.File.WriteAllLines(txtPath, allLines);
-                fileResultMap[System.IO.Path.GetFileName(pdfPath)] = allLines;
-                txtPaths.Add(txtPath);
-            }
-            // 普通图片单独txt输出
-            foreach (var img in imageFiles)
-            {
-                if (imgToText.TryGetValue(img, out var lines))
-                {
-                    string srcDir = System.IO.Path.GetDirectoryName(img) ?? "";
-                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
-                    if (!createdResultDirs.Contains(resultDir))
-                    {
-                        System.IO.Directory.CreateDirectory(resultDir);
-                        createdResultDirs.Add(resultDir);
-                    }
-                    string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(img) + ".txt");
-                    System.IO.File.WriteAllLines(txtPath, lines);
-                    fileResultMap[System.IO.Path.GetFileName(img)] = lines;
-                    txtPaths.Add(txtPath);
-                }
-            }
+            var txtPaths = SaveOcrResults(imgToText, pdfToTxtMap, pdfFiles, imageFiles, createdResultDirs);
 
             if (progressOcr != null) progressOcr.Value = 100;
             // 计时结束
@@ -803,6 +712,124 @@ namespace PeachOCR
             }
         }
 
+        // 保存OCR识别结果的方法
+        private List<string> SaveOcrResults(
+            Dictionary<string, List<string>> imgToText,
+            Dictionary<string, List<string>> pdfToTxtMap,
+            List<string> pdfFiles,
+            List<string> imageFiles,
+            HashSet<string> createdResultDirs)
+        {
+            var txtPaths = new List<string>();
+            bool mergeFiles = _aiSettings?.MergeIntoSingleFile ?? false;
+            string outputFormat = _aiSettings?.OutputFileFormat ?? "txt标准格式";
+            string fileExtension = outputFormat == "md文件" ? ".md" : ".txt";
+
+            if (mergeFiles)
+            {
+                // 合并为单个文件的情况
+                var allLines = new List<string>();
+
+                // 先收集PDF识别结果，同时更新fileResultMap
+                foreach (var kv in pdfToTxtMap)
+                {
+                    string pdfName = System.IO.Path.GetFileNameWithoutExtension(kv.Key);
+                    allLines.Add($"=== {pdfName} ===");
+                    var imgs = kv.Value;
+                    var pdfLines = new List<string>();
+                    foreach (var img in imgs)
+                    {
+                        if (imgToText.TryGetValue(img, out var lines))
+                        {
+                            allLines.AddRange(lines);
+                            pdfLines.AddRange(lines);
+                        }
+                    }
+                    allLines.Add(""); // 添加空行分隔
+                    fileResultMap[System.IO.Path.GetFileName(kv.Key)] = pdfLines;
+                }
+
+                // 再收集图片识别结果，同时更新fileResultMap
+                foreach (var img in imageFiles)
+                {
+                    if (imgToText.TryGetValue(img, out var lines))
+                    {
+                        string imgName = System.IO.Path.GetFileNameWithoutExtension(img);
+                        allLines.Add($"=== {imgName} ===");
+                        allLines.AddRange(lines);
+                        allLines.Add(""); // 添加空行分隔
+                        fileResultMap[System.IO.Path.GetFileName(img)] = lines;
+                    }
+                }
+
+                // 确定保存位置（使用第一个文件的目录）
+                string? firstFile = pdfFiles.Count > 0 ? pdfFiles[0] : (imageFiles.Count > 0 ? imageFiles[0] : null);
+                if (firstFile != null)
+                {
+                    string srcDir = System.IO.Path.GetDirectoryName(firstFile) ?? "";
+                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                    if (!createdResultDirs.Contains(resultDir))
+                    {
+                        System.IO.Directory.CreateDirectory(resultDir);
+                        createdResultDirs.Add(resultDir);
+                    }
+                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+                    string outputPath = System.IO.Path.Combine(resultDir, $"{timestamp}_CombinedOCRResult{fileExtension}");
+                    System.IO.File.WriteAllLines(outputPath, allLines);
+                    txtPaths.Add(outputPath);
+                }
+            }
+            else
+            {
+                // 不合并的情况，保持原有逻辑
+
+                // PDF合并txt输出
+                foreach (var kv in pdfToTxtMap)
+                {
+                    string pdfPath = kv.Key;
+                    var imgs = kv.Value;
+                    var allLines = new List<string>();
+                    foreach (var img in imgs)
+                    {
+                        if (imgToText.TryGetValue(img, out var lines))
+                            allLines.AddRange(lines);
+                    }
+                    string srcDir = System.IO.Path.GetDirectoryName(pdfPath) ?? "";
+                    string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                    if (!createdResultDirs.Contains(resultDir))
+                    {
+                        System.IO.Directory.CreateDirectory(resultDir);
+                        createdResultDirs.Add(resultDir);
+                    }
+                    string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(pdfPath) + fileExtension);
+                    System.IO.File.WriteAllLines(txtPath, allLines);
+                    fileResultMap[System.IO.Path.GetFileName(pdfPath)] = allLines;
+                    txtPaths.Add(txtPath);
+                }
+
+                // 普通图片单独txt输出
+                foreach (var img in imageFiles)
+                {
+                    if (imgToText.TryGetValue(img, out var lines))
+                    {
+                        string srcDir = System.IO.Path.GetDirectoryName(img) ?? "";
+                        string resultDir = System.IO.Path.Combine(srcDir, "OCR_Result");
+                        if (!createdResultDirs.Contains(resultDir))
+                        {
+                            System.IO.Directory.CreateDirectory(resultDir);
+                            createdResultDirs.Add(resultDir);
+                        }
+                        string txtPath = System.IO.Path.Combine(resultDir, System.IO.Path.GetFileNameWithoutExtension(img) + fileExtension);
+                        System.IO.File.WriteAllLines(txtPath, lines);
+                        fileResultMap[System.IO.Path.GetFileName(img)] = lines;
+                        txtPaths.Add(txtPath);
+                    }
+                }
+            }
+
+            return txtPaths;
+        }
+
         // AI相关方法
         private void LoadAISettings()
         {
@@ -820,7 +847,10 @@ namespace PeachOCR
                 OcrApiUrl = Properties.Settings.Default.OCRApiUrl,
                 OcrApiKey = Properties.Settings.Default.OCRApiKey,
                 OcrModel = Properties.Settings.Default.OCRModel,
-                ScreenshotHotkey = Properties.Settings.Default.ScreenshotHotkey
+                ScreenshotHotkey = Properties.Settings.Default.ScreenshotHotkey,
+                MergeIntoSingleFile = Properties.Settings.Default.MergeIntoSingleFile,
+                SaveProcessedImage = Properties.Settings.Default.SaveProcessedImage,
+                EnableGpu = Properties.Settings.Default.EnableGpu
             }!;
         }
 
@@ -841,6 +871,9 @@ namespace PeachOCR
             Properties.Settings.Default.OCRApiKey = _aiSettings.OcrApiKey;
             Properties.Settings.Default.OCRModel = _aiSettings.OcrModel;
             Properties.Settings.Default.ScreenshotHotkey = _aiSettings.ScreenshotHotkey;
+            Properties.Settings.Default.MergeIntoSingleFile = _aiSettings.MergeIntoSingleFile;
+            Properties.Settings.Default.SaveProcessedImage = _aiSettings.SaveProcessedImage;
+            Properties.Settings.Default.EnableGpu = _aiSettings.EnableGpu;
             Properties.Settings.Default.Save();
         }
 

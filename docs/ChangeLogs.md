@@ -3,11 +3,23 @@
 ## TODO
 
 - 新增Windows本地OCR功能
-- 增加微信OCR功能（https://www.nuget.org/packages/WeChatOcr、https://github.com/ZGGSONG/WeChatOcr/）
 - 新增MinerU OCR功能
 
+## 0.8.9 - 2026-05-28
+- feat(OCR): 实现"合并为单个文件"功能，当设置中勾选此选项时，所有识别结果将合并保存到一个文件中
+- feat(OCR): 合并文件支持txt和md格式，根据设置中的"输出文件格式"来决定保存为txt或md文件
+- feat(OCR): 合并文件时，每个文件的识别结果前会添加"=== 文件名 ==="的标题，便于区分
+- feat(OCR): 合并文件名包含时间戳，格式为"yyyy-MM-dd_HH-mm-ss_CombinedOCRResult"，避免覆盖之前的文件
+- refactor(架构): 新增SaveOcrResults通用方法，统一处理两种模型（微信OCR和其他模型）的结果保存逻辑
+
+## 0.8.8 - 2026-05-28
+- refactor(界面): 将"合并为单个文件"、"保存处理图片"、"启用GPU加速"三个选项移动到设置页面
+- refactor(架构): 新增AISettings.MergeIntoSingleFile、SaveProcessedImage、EnableGpu三个属性
+- refactor(架构): 更新Settings.settings和Settings.Designer.cs，支持三个新设置项的持久化
+- refactor(架构): 修改MainWindow使用AISettings中的属性替代原来的CheckBox控件
+
 ## 0.8.7 - 2026-05-28
-- fix(微信OCR)：修复 WeChatOCR DLL 加载路径问题，在程序启动时设置正确的工作目录
+- fix(微信OCR)：修复 WeChatOCR DLL 加载路径问题，在程序启动时设置正确的工作目录（https://www.nuget.org/packages/WeChatOcr、https://github.com/ZGGSONG/WeChatOCR/）
 - feat(微信OCR)：支持批量处理多个文件，每个文件之间添加 100ms 间隔避免服务过载
 - fix(微信OCR)：优化批量处理性能，缩短文件间延迟时间
 - fix(WeChatOcrService)：简化实现，移除不必要的 DLL 复制逻辑（WeChatOCR 包已包含所需资源）

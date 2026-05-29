@@ -22,6 +22,10 @@ namespace PeachOCR
 
         private string _screenshotHotkey = string.Empty;
 
+        private bool _mergeIntoSingleFile = false;
+        private bool _saveProcessedImage = false;
+        private bool _enableGpu = false;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -115,6 +119,24 @@ namespace PeachOCR
             set => SetField(ref _screenshotHotkey, value);
         }
 
+        public bool MergeIntoSingleFile
+        {
+            get => _mergeIntoSingleFile;
+            set => SetField(ref _mergeIntoSingleFile, value);
+        }
+
+        public bool SaveProcessedImage
+        {
+            get => _saveProcessedImage;
+            set => SetField(ref _saveProcessedImage, value);
+        }
+
+        public bool EnableGpu
+        {
+            get => _enableGpu;
+            set => SetField(ref _enableGpu, value);
+        }
+
         public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiUrl) &&
                                    !string.IsNullOrWhiteSpace(ApiKey) &&
                                    !string.IsNullOrWhiteSpace(ModelName);
@@ -134,6 +156,9 @@ namespace PeachOCR
             OcrApiKey = string.Empty;
             OcrModel = "PaddleOCR-VL-1.6";
             ScreenshotHotkey = string.Empty;
+            MergeIntoSingleFile = false;
+            SaveProcessedImage = false;
+            EnableGpu = false;
         }
 
         public void ResetToDeepSeekDefaults()
@@ -151,6 +176,9 @@ namespace PeachOCR
             OcrApiKey = string.Empty;
             OcrModel = "PaddleOCR-VL-1.6";
             ScreenshotHotkey = string.Empty;
+            MergeIntoSingleFile = false;
+            SaveProcessedImage = false;
+            EnableGpu = false;
         }
     }
 }
