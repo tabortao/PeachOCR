@@ -279,7 +279,7 @@ namespace PeachOCR
             var imgToText = new Dictionary<string, List<string>>();
             int total = allOcrImages.Count;
 
-            if (comboModel != null && comboModel.SelectedIndex == 2)
+            if (comboModel != null && comboModel.SelectedIndex == 3)
             {
                 var wechatOcr = new OCR.WeChatOcrService();
                 
@@ -312,12 +312,17 @@ namespace PeachOCR
             else
             {
                 var processor = new OcrBatchProcessor();
-                processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+                if (comboModel != null && comboModel.SelectedIndex == 2)
+                    processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv4);
+                else if (comboModel != null && comboModel.SelectedIndex == 1)
+                    processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv5);
+                else
+                    processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv6);
                 processor.SetUseGpu(_aiSettings?.EnableGpu ?? false, _aiSettings?.EnableGpu ?? false);
                 processor.SetSaveResultImage(_aiSettings?.SaveProcessedImage ?? false);
                 processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
 
-                if (comboModel != null && comboModel.SelectedIndex >= 3 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+                if (comboModel != null && comboModel.SelectedIndex == 4 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
                 {
                     processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
                 }
@@ -349,7 +354,7 @@ namespace PeachOCR
                     {
                         foreach (var r in detail.Result)
                         {
-                            lines.Add(r.text);
+                            lines.Add(r.Text);
                         }
                     }
                     imgToText[detail.ImgPath] = lines;
@@ -580,13 +585,18 @@ namespace PeachOCR
             allOcrImages.AddRange(imageFiles);
 
             var processor = new OcrBatchProcessor();
-            processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+            if (comboModel != null && comboModel.SelectedIndex == 2)
+                processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv4);
+            else if (comboModel != null && comboModel.SelectedIndex == 1)
+                processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv5);
+            else
+                processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv6);
             processor.SetUseGpu(_aiSettings?.EnableGpu ?? false, _aiSettings?.EnableGpu ?? false);
             processor.SetSaveResultImage(_aiSettings?.SaveProcessedImage ?? false);
             processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
 
             // 设置在线OCR服务配置（当选择在线模型时）
-            if (comboModel != null && comboModel.SelectedIndex >= 2 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+            if (comboModel != null && comboModel.SelectedIndex == 4 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
             {
                 processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
             }
@@ -621,7 +631,7 @@ namespace PeachOCR
                 {
                     foreach (var r in detail.Result)
                     {
-                        lines.Add(r.text);
+                        lines.Add(r.Text);
                     }
                 }
                 imgToText[detail.ImgPath] = lines;
@@ -1313,7 +1323,7 @@ namespace PeachOCR
                 var comboModel = this.FindName("ComboModel") as ComboBox;
                 var checkGpu = this.FindName("CheckGpu") as CheckBox;
 
-                if (comboModel != null && comboModel.SelectedIndex == 2)
+                if (comboModel != null && comboModel.SelectedIndex == 3)
                 {
                     // 使用 WeChat-OCR(本地)
                     var wechatOcr = new OCR.WeChatOcrService();
@@ -1325,12 +1335,17 @@ namespace PeachOCR
                 {
                     // 使用其他模型
                     var processor = new OcrBatchProcessor();
-                    processor.SetModel(comboModel != null && comboModel.SelectedIndex == 0 ? OcrBatchProcessor.ModelType.PP_OCRv4 : OcrBatchProcessor.ModelType.PP_OCRv5);
+                    if (comboModel != null && comboModel.SelectedIndex == 2)
+                        processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv4);
+                    else if (comboModel != null && comboModel.SelectedIndex == 1)
+                        processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv5);
+                    else
+                        processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv6);
                     processor.SetUseGpu(checkGpu != null && checkGpu.IsChecked == true, checkGpu != null && checkGpu.IsChecked == true);
                     processor.SetSaveResultImage(false);
                     processor.SetOutputFileFormat(_aiSettings?.OutputFileFormat ?? "txt标准格式");
 
-                    if (comboModel != null && comboModel.SelectedIndex >= 3 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
+                    if (comboModel != null && comboModel.SelectedIndex == 4 && _aiSettings != null && !string.IsNullOrEmpty(_aiSettings.OcrApiUrl))
                     {
                         processor.SetOcrServiceConfig(_aiSettings.OcrServiceProvider, _aiSettings.OcrApiUrl, _aiSettings.OcrApiKey, _aiSettings.OcrModel);
                     }
@@ -1341,7 +1356,7 @@ namespace PeachOCR
 
                     if (details.Count > 0 && details[0].Result != null)
                     {
-                        var resultText = string.Join(Environment.NewLine, details[0].Result!.Select(r => r.text));
+                        var resultText = string.Join(Environment.NewLine, details[0].Result!.Select(r => r.Text));
                         ShowOcrResultWindow(resultText);
                     }
                 }

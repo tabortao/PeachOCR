@@ -9,7 +9,7 @@ PeachOCR 是一个基于 .NET 10 WPF 框架开发的本地批量图片/PDF文字
 ## 主要特性
 
 - 支持批量图片（JPG/PNG/BMP/TIFF/WEBP）和 PDF 文件文字识别
-- 支持多种OCR模型：PP-OCRv4/PP-OCRv5（本地）、WeChat-OCR（本地）、PP-OCR-VL（在线）
+- 支持多种OCR模型：PP-OCRv6（本地，默认）、PP-OCRv5（本地）、PP-OCRv4（本地）、WeChat-OCR（本地）、PP-OCR-VL（在线）
 - 支持 GPU 加速与 CPU 推理
 - 支持截图OCR，快捷键触发，支持选择区域
 - 识别结果支持单文件或合并输出（txt/md/json格式，合并文件自动添加时间戳）
@@ -22,7 +22,7 @@ PeachOCR 是一个基于 .NET 10 WPF 框架开发的本地批量图片/PDF文字
 ### 环境要求
 - Windows 10/11
 - .NET 10.0 SDK
-- 依赖包：OpenVINO.CSharp.API.Extensions.PaddleOCR、OpenVINO.runtime.win、OpenCvSharp4.runtime.win
+- 依赖包：Sdcb.OpenVINO.PaddleOCR、Sdcb.OpenVINO.PaddleOCR.Models.Online、Sdcb.OpenVINO.runtime.win-x64、OpenCvSharp4.runtime.win
 - AI功能需要配置支持的AI服务API（如OpenAI兼容接口）
 
 ### 构建与运行
@@ -42,7 +42,7 @@ dotnet run --no-build --verbosity detailed
 ```
 
 ### 主要界面说明
-- 模型选择：PP-OCRv4/PP-OCRv5（本地）、WeChat-OCR（本地）、PP-OCR-VL（在线）
+- 模型选择：PP-OCRv6（本地，默认）、PP-OCRv5（本地）、PP-OCRv4（本地）、WeChat-OCR（本地）、PP-OCR-VL（在线）
 - ⚙️ AI设置：OCR选项（合并为单个文件、保存处理图片、启用GPU加速）及AI服务参数配置
 - 截图：支持区域选择截图OCR
 - 进度条/状态栏：显示识别进度与结果存储路径
@@ -99,7 +99,9 @@ PeachOCR help
 [CLI使用说明](./docs/CLI使用说明.md)
 
 ## 依赖模型
-- `models/ch_PP-OCRv4/` 及 `models/ch_PP-OCRv5/` 下需放置对应 onnx 模型和字典文件
+- `models/ch_PP-OCRv6/` — PP-OCRv6 模型（ONNX 格式，~37MB）
+- `models/ch_PP-OCRv4_det/`、`models/ch_PP-OCRv4_rec/`、`models/ch_ppocr_mobile_v2.0_cls/` — PP-OCRv4/v5 模型（Paddle 格式，~17MB，首次运行自动下载）
+- 预下载工具：`dotnet run --project tools/download_models -- --all`
 
 ## AI功能配置
 AI功能需要配置支持OpenAI兼容接口的AI服务：
@@ -109,7 +111,7 @@ AI功能需要配置支持OpenAI兼容接口的AI服务：
 - 自定义提示词模板（OCR增强、分析、翻译）
 
 ## 感谢
-- [PaddleOCR-OpenVINO-CSharp](https://github.com/guojin-yan/PaddleOCR-OpenVINO-CSharp)
+- [OpenVINO.NET](https://github.com/sdcb/openvino.net) - Sdcb.OpenVINO.PaddleOCR 推理库
 
 ## 软件下载
 

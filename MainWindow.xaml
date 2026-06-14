@@ -430,8 +430,9 @@
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="模型选择：" VerticalAlignment="Center" Margin="0,0,8,0"/>
                     <ComboBox x:Name="ComboModel" Width="200" SelectedIndex="0">
-                        <ComboBoxItem Content="PP-OCRv4(本地)"/>
+                        <ComboBoxItem Content="PP-OCRv6(本地)"/>
                         <ComboBoxItem Content="PP-OCRv5(本地)"/>
+                        <ComboBoxItem Content="PP-OCRv4(本地)"/>
                         <ComboBoxItem Content="WeChat-OCR(本地)"/>
                         <ComboBoxItem Content="PP-OCR-VL(在线)"/>
                     </ComboBox>

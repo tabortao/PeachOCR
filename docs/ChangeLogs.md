@@ -5,6 +5,14 @@
 - 新增Windows本地OCR功能
 - 新增MinerU OCR功能
 
+## 0.8.10 - 2026-06-14
+- feat(OCR): 添加PP-OCRv6(本地)模型支持，基于Sdcb.OpenVINO.PaddleOCR，首次使用自动下载
+- upgrade(OCR): 将OCR引擎从OpenVINO.CSharp.API.Extensions.PaddleOCR迁移至Sdcb.OpenVINO.PaddleOCR，减少冗余包和安装体积
+- refactor(OCR): PP-OCRv4和PP-OCRv5迁移至新的Sdcb.OpenVINO.PaddleOCR API
+- feat(UI): PP-OCRv6设为默认模型
+- feat(CLI): CLI模型选项新增v6，默认模型改为v6
+- fix(OCR): 修复OcrRegionResult属性引用的大小写问题(Text/Score/Box)
+
 ## 0.8.9 - 2026-05-28
 - feat(OCR): 实现"合并为单个文件"功能，当设置中勾选此选项时，所有识别结果将合并保存到一个文件中
 - feat(OCR): 合并文件支持txt和md格式，根据设置中的"输出文件格式"来决定保存为txt或md文件

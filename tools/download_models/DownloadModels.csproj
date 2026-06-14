@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DownloadModels</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Sdcb.OpenVINO.PaddleOCR" Version="0.8.0" />
+    <PackageReference Include="Sdcb.OpenVINO.PaddleOCR.Models.Online" Version="0.8.0" />
+    <PackageReference Include="Sdcb.OpenVINO.runtime.win-x64" Version="2026.2.0" />
+  </ItemGroup>
+</Project>

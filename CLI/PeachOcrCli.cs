@@ -243,7 +243,7 @@ PeachOCR - 批量图片/PDF文字识别工具
 OCR命令选项：
   -i, --input <path>           输入文件或目录路径（必需）
   -o, --output <path>          输出目录或文件路径（默认：与输入文件同目录）
-  -m, --model <name>          OCR模型：v4, v5, wechat, online（默认：v4）
+  -m, --model <name>          OCR模型：v6, v5, v4, wechat, online（默认：v6）
   -f, --format <type>         输出格式：txt, md, json（默认：txt）
   --gpu                         启用GPU加速（默认：禁用）
   -c, --concurrency <num>     并发处理数（默认：2）
@@ -257,8 +257,9 @@ OCR命令选项：
   PeachOCR ocr -i ./images --merge -f md -o combined_results.md
 
 支持的OCR模型：
-  v4       PP-OCRv4（推荐）
+  v6       PP-OCRv6（推荐，默认，首次使用将自动下载模型）
   v5       PP-OCRv5
+  v4       PP-OCRv4
   wechat   WeChat OCR
   online   PP-OCR-VL API（需要配置API密钥）
 
@@ -287,8 +288,8 @@ OCR 命令详解
                         默认值：与输入文件同目录的 OCR_Result 文件夹
 
   -m, --model <name>    OCR模型选择
-                        可选值：v4, v5, wechat, online
-                        默认值：v4
+                        可选值：v6, v5, v4, wechat, online
+                        默认值：v6
 
   -f, --format <type>   输出格式
                         可选值：txt, md, json
@@ -314,15 +315,21 @@ OCR 命令详解
             Console.WriteLine(@"
 OCR 模型说明
 
-v4 (PP-OCRv4)
-  基于PaddleOCR的第四代模型
-  平衡了速度和精度
-  推荐用于大多数场景
+v6 (PP-OCRv6)
+  基于PaddleOCR的第六代模型
+  最新的识别精度和速度平衡
+  首次使用将自动下载模型文件（~15MB）
+  推荐作为默认模型
 
 v5 (PP-OCRv5)
   基于PaddleOCR的第五代模型
   更高的识别精度
   相对较慢的推理速度
+
+v4 (PP-OCRv4)
+  基于PaddleOCR的第四代模型
+  平衡了速度和精度
+  适用于大多数场景
 
 wechat (WeChat OCR)
   使用Windows微信内置的OCR功能
@@ -362,7 +369,7 @@ json (JSON格式)
     {
         public string Input { get; set; } = string.Empty;
         public string Output { get; set; } = string.Empty;
-        public string Model { get; set; } = "v4";
+        public string Model { get; set; } = "v6";
         public string Format { get; set; } = "txt";
         public bool Gpu { get; set; }
         public int Concurrency { get; set; } = 2;

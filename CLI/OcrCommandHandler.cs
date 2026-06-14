@@ -199,8 +199,11 @@ namespace PeachOCR.CLI
                 case "v5":
                     processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv5);
                     break;
+                case "v6":
+                    processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv6);
+                    break;
                 default:
-                    processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv4);
+                    processor.SetModel(OcrBatchProcessor.ModelType.PP_OCRv6);
                     break;
             }
 
@@ -280,9 +283,9 @@ namespace PeachOCR.CLI
                     {
                         textItems.Add(new Dictionary<string, object?>
                         {
-                            ["text"] = r?.text ?? string.Empty,
-                            ["confidence"] = r?.score ?? 0.0,
-                            ["boundingBox"] = r?.box
+                            ["text"] = r?.Text ?? string.Empty,
+                            ["confidence"] = r?.Score ?? 0.0,
+                            ["boundingBox"] = r?.Box
                         });
                     }
                 }
@@ -355,9 +358,9 @@ namespace PeachOCR.CLI
                     {
                         foreach (var item in result.Result)
                         {
-                            if (!string.IsNullOrWhiteSpace(item?.text))
+                            if (!string.IsNullOrWhiteSpace(item?.Text))
                             {
-                                writer.WriteLine(item.text);
+                                writer.WriteLine(item.Text);
                             }
                         }
                     }
@@ -395,9 +398,9 @@ namespace PeachOCR.CLI
                 {
                     foreach (var item in result.Result)
                     {
-                        if (!string.IsNullOrWhiteSpace(item?.text))
+                        if (!string.IsNullOrWhiteSpace(item?.Text))
                         {
-                            writer.WriteLine(item.text);
+                            writer.WriteLine(item.Text);
                             writer.WriteLine();
                         }
                     }
