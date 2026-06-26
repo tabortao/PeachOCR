@@ -1,0 +1,100 @@
+# 构建 Windows 桌面版 (WPF)
+name: Build Windows Desktop (WPF)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        required: false
+        type: string
+  # push:
+  #   branches:
+  #     - main
+
+env:
+  OutputPath: "${{ github.workspace }}/PeachOCR/bin/Release/win-x64"
+  OutputPathFramework: "${{ github.workspace }}/PeachOCR/bin/Release/win-x64-framework"
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    # 从项目文件获取版本号
+    - name: Get Version
+      id: version
+      shell: pwsh
+      run: |
+        $xml = [Xml] (Get-Content PeachOCR/PeachOCR.csproj)
+        $version = $xml.Project.PropertyGroup.Version
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+
+    # 构建 x64 自包含版本（含 .NET 运行时 + 模型文件）
+    - name: Build x64 Self-contained
+      run: |
+        dotnet publish PeachOCR/PeachOCR.csproj `
+        -c Release `
+        -r win-x64 `
+        --self-contained true `
+        -p:DebugType=None `
+        -p:DebugSymbols=false `
+        -p:EnableWindowsTargeting=true `
+        -o "${{ env.OutputPath }}"
+
+    # 构建 x64 框架依赖版本（不含 .NET 运行时，体积更小）
+    - name: Build x64 Framework-dependent
+      run: |
+        dotnet publish PeachOCR/PeachOCR.csproj `
+        -c Release `
+        -r win-x64 `
+        --self-contained false `
+        -p:DebugType=None `
+        -p:DebugSymbols=false `
+        -p:EnableWindowsTargeting=true `
+        -o "${{ env.OutputPathFramework }}"
+
+    # 创建 ZIP 压缩包
+    - name: Create ZIP archives
+      shell: pwsh
+      run: |
+        Compress-Archive -Path "${{ env.OutputPath }}/*" -DestinationPath "PeachOCR-windows-x64-v${{ steps.version.outputs.version }}.zip" -Force
+        Compress-Archive -Path "${{ env.OutputPathFramework }}/*" -DestinationPath "PeachOCR-windows-x64-framework-v${{ steps.version.outputs.version }}.zip" -Force
+
+    # 上传构建产物
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: PeachOCR-Windows-v${{ steps.version.outputs.version }}
+        path: |
+          ${{ env.OutputPath }}
+          ${{ env.OutputPathFramework }}
+          PeachOCR-windows-*.zip
+        if-no-files-found: error
+
+    # 创建 GitHub Release
+    - name: Create Release
+      if: github.event.inputs.release_tag != ''
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.release_tag }}
+        files: |
+          PeachOCR-windows-x64-v${{ steps.version.outputs.version }}.zip
+          PeachOCR-windows-x64-framework-v${{ steps.version.outputs.version }}.zip
+        prerelease: true
+        generate_release_notes: true
