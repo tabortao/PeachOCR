@@ -15,6 +15,9 @@ env:
   OutputPath: "${{ github.workspace }}/bin/Release/win-x64"
   OutputPathFramework: "${{ github.workspace }}/bin/Release/win-x64-framework"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -88,7 +91,7 @@ jobs:
     # 创建 GitHub Release
     - name: Create Release
       if: github.event.inputs.release_tag != ''
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
