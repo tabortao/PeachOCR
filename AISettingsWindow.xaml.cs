@@ -531,15 +531,6 @@ namespace PeachOCR
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            string apiKey = GetApiKey();
-            if (string.IsNullOrWhiteSpace(TxtApiUrl.Text) ||
-                string.IsNullOrWhiteSpace(apiKey) ||
-                string.IsNullOrWhiteSpace(TxtModelName.Text))
-            {
-                MessageBox.Show("请填写完整的API配置信息", "配置不完整", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             SaveSettings();
             DialogResult = true;
             Close();

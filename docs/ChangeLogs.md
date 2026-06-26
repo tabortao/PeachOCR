@@ -5,6 +5,16 @@
 - 新增Windows本地OCR功能
 - 新增MinerU OCR功能
 
+## 0.8.11 - 2026-06-26
+- feat(模型): PP-OCRv4/v5模型预下载至本地models目录，减少首次运行等待
+- feat(工具): 新增通用模型预下载工具 tools/download_models，支持 v4/v6 一键下载
+- refactor(模型): PP-OCRv4/v5 使用 Paddle 格式 (.pdmodel)，PP-OCRv6 使用 ONNX 格式
+- refactor(目录): v6模型统一收敛至 models/ch_PP-OCRv6/，与 v5 结构一致
+- fix(设置): AI API 和 OCR API 配置解除互相绑定，任意填写一个即可保存
+- docs: 新增模型下载工具说明 docs/模型下载工具说明.md
+- chore: 清理废弃的 ch_PP-OCRv4/、ch_PP-OCRv5/ 空目录
+- chore: 更新README模型相关说明
+
 ## 0.8.10 - 2026-06-14
 - feat(OCR): 添加PP-OCRv6(本地)模型支持，基于Sdcb.OpenVINO.PaddleOCR，首次使用自动下载
 - upgrade(OCR): 将OCR引擎从OpenVINO.CSharp.API.Extensions.PaddleOCR迁移至Sdcb.OpenVINO.PaddleOCR，减少冗余包和安装体积
