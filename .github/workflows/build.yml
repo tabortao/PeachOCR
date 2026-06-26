@@ -7,13 +7,13 @@ on:
       release_tag:
         required: false
         type: string
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 
 env:
-  OutputPath: "${{ github.workspace }}/PeachOCR/bin/Release/win-x64"
-  OutputPathFramework: "${{ github.workspace }}/PeachOCR/bin/Release/win-x64-framework"
+  OutputPath: "${{ github.workspace }}/bin/Release/win-x64"
+  OutputPathFramework: "${{ github.workspace }}/bin/Release/win-x64-framework"
 
 jobs:
   build:
@@ -39,14 +39,14 @@ jobs:
       id: version
       shell: pwsh
       run: |
-        $xml = [Xml] (Get-Content PeachOCR/PeachOCR.csproj)
+        $xml = [Xml] (Get-Content PeachOCR.csproj)
         $version = $xml.Project.PropertyGroup.Version
         echo "version=$version" >> $env:GITHUB_OUTPUT
 
     # 构建 x64 自包含版本（含 .NET 运行时 + 模型文件）
     - name: Build x64 Self-contained
       run: |
-        dotnet publish PeachOCR/PeachOCR.csproj `
+        dotnet publish PeachOCR.csproj `
         -c Release `
         -r win-x64 `
         --self-contained true `
@@ -58,7 +58,7 @@ jobs:
     # 构建 x64 框架依赖版本（不含 .NET 运行时，体积更小）
     - name: Build x64 Framework-dependent
       run: |
-        dotnet publish PeachOCR/PeachOCR.csproj `
+        dotnet publish PeachOCR.csproj `
         -c Release `
         -r win-x64 `
         --self-contained false `
