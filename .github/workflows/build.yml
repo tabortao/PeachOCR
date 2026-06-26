@@ -7,9 +7,9 @@ on:
       release_tag:
         required: false
         type: string
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 env:
   OutputPath: "${{ github.workspace }}/PeachOCR/bin/Release/win-x64"
